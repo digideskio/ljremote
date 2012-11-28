@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="NUM_MAX_LENGTH">130</integer>
+    <integer name="STATIC_MAX_INT">100</integer>
+</resources>

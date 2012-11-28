@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="StaticItem"></style>
+
+    <style name="StaticItem.SeekBar">
+        <item name="android:layout_width">220dp</item>
+        <item name="android:visibility">visible</item>
+    </style>
+</resources>

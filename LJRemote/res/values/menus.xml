@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sequences">Sequences</string>
+    <string name="statics">Statics</string>
+    <string name="cues">Cues</string>
+    <string name="bgcues">BG Cues</string>
+    <string name="mstr_int">Master Intensity</string>
+    <string name="cuelists">Cue Lists</string>
+</resources>

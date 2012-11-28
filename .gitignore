@@ -4,6 +4,7 @@
 
 # Eclipse compiler output
 bin/
+.settings/
 
 # VPUML  workspace prefs
 /.vpprefdata

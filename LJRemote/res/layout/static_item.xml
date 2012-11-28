@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/RelativeLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/static_list_selector"
+    android:orientation="horizontal"
+    tools:context=".adapters.StaticCursorAdapter"
+    tools:ignore="TextViewEdits" >
+
+    <TextView
+        android:id="@+id/id"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
+        android:gravity="center|center_horizontal"
+        android:inputType="numberDecimal"
+        android:maxLength="@integer/NUM_MAX_LENGTH"
+        android:text="0"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@drawable/green" />
+
+    <Button
+        android:id="@+id/intensity"
+        android:layout_width="66dp"
+        android:layout_height="44dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
+        android:text="100" />
+    
+    <SeekBar
+        android:id="@+id/seek_intensity"
+        style="@style/StaticItem.SeekBar"
+        android:layout_height="44dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@id/intensity"
+        android:max="@integer/STATIC_MAX_INT" />
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@id/seek_intensity"
+        android:layout_toRightOf="@id/id"
+        android:clickable="true"
+        android:duplicateParentState="true"
+        android:gravity="center"
+        android:text="Large Text"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+</RelativeLayout>
