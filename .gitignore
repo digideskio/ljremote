@@ -4,3 +4,9 @@
 
 # Eclipse compiler output
 bin/
+
+# VPUML  workspace prefs
+/.vpprefdata
+
+# Maven target files
+target/
