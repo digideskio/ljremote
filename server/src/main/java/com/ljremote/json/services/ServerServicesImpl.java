@@ -9,7 +9,7 @@ public class ServerServicesImpl implements ServerService{
 	@Override
 	public int connect() {
 		// TODO Auto-generated method stub
-		return 0;
+		return -1;
 	}
 
 	@Override
