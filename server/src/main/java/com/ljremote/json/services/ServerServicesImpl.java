@@ -6,4 +6,22 @@ public class ServerServicesImpl implements ServerService{
 		return "Hello world !";
 	}
 
+	@Override
+	public int connect() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public boolean hello() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void closeSession() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
