@@ -209,43 +209,53 @@ public class LJServer {
 					return;
 				}
 
-				// keep handling requests
-				int errors = 0;
-				while (LJServer.this.keepRunning.get() && clientSocket.isConnected()) {
-					
-
-					// handle it if keepalive
-					try {
-						if (input.available()==0) {
-							Thread.yield();
-							if(input.read() < 0){
-								break;								
-							}
-//							if(!clientSocket.getKeepAlive()){
-//								break;
+				try {
+					clientSocket.setSoTimeout(5000);
+					// keep handling requests
+					int errors = 0;
+					int loop= -1;
+					while (LJServer.this.keepRunning.get() && clientSocket.isConnected()) {
+						LOGGER.debug(String.format("Loop %d: TO=%d", ++loop,clientSocket.getSoTimeout()));
+						
+						// handle it if keepalive
+						try {
+//							if (input.available()==0) {
+//								Thread.yield();
+////								if(input.read() < 0){
+////									break;								
+////								}
+////							if(!clientSocket.getKeepAlive()){
+////								break;
+////							}
+//								continue;
 //							}
-							continue;
-						}
-
-						jsonRpcServer.handle(input, output);
-					} catch (Throwable t) {
-						errors++;
-						if (errors<maxClientErrors) {
-							LOGGER.error( "Exception while handling request", t);
-						} else {
-							LOGGER.error( "Closing client connection due to repeated errors", t);
-							break;
+							
+//							input.mark(10);
+//							input.read();
+//							input.reset();
+							jsonRpcServer.handle(input, output);
+						} catch (Throwable t) {
+							errors++;
+							if (errors<maxClientErrors) {
+								LOGGER.error( "Exception while handling request", t);
+							} else {
+								LOGGER.error( "Closing client connection due to repeated errors", t);
+								break;
+							}
 						}
 					}
+				} catch (SocketException e1) {
+					LOGGER.info("Timeout !!!");
+				} finally {
+					// clean up
+					try {
+						clientSocket.close();
+						input.close();
+						output.close();
+						LOGGER.info("Client disconnected");
+					} catch (IOException e) { /* no-op */ }
 				}
 
-				// clean up
-				try {
-					clientSocket.close();
-					input.close();
-					output.close();
-					LOGGER.info("Client disconnected");
-				} catch (IOException e) { /* no-op */ }
 			}
 		}
 
