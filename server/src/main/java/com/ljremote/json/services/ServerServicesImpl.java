@@ -1,5 +1,7 @@
 package com.ljremote.json.services;
 
+import com.ljremote.server.LJServer;
+
 public class ServerServicesImpl implements ServerService{
 
 	public String helloWord() {
@@ -8,14 +10,12 @@ public class ServerServicesImpl implements ServerService{
 
 	@Override
 	public int connect() {
-		// TODO Auto-generated method stub
-		return -1;
+		return (int) LJServer.DEFAULT_CLIENT_TIMEOUT;
 	}
 
 	@Override
 	public boolean hello() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override

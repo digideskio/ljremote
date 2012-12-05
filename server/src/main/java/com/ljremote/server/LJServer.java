@@ -8,9 +8,15 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ServerSocketFactory;
@@ -31,7 +37,9 @@ public class LJServer {
 
 		private static final Log LOGGER = LogFactory.getLog(LJServer.class);
 
-		private static final long SERVER_SOCKET_SO_TIMEOUT	= 5000;
+		private static final int SERVER_SOCKET_SO_TIMEOUT	= 5000;
+
+		public static final long DEFAULT_CLIENT_TIMEOUT = 8000;
 
 		private ThreadPoolExecutor executor;
 		private ServerSocket serverSocket;
@@ -41,6 +49,10 @@ public class LJServer {
 		private AtomicBoolean isStarted 	= new AtomicBoolean(false);
 		private AtomicBoolean keepRunning 	= new AtomicBoolean(false);
 
+		private ExecutorService serverExecutor;
+
+		private int maxClients;
+		
 		/**
 		 * Creates a {@code StreamServer} with the given max number
 		 * of threads using the given {@link ServerSocket} to listen
@@ -57,12 +69,14 @@ public class LJServer {
 			this.jsonRpcServer		= jsonRpcServer;
 			this.serverSocket		= serverSocket;
 
+			this.maxClients = maxThreads;
 			// create the executor server
-			executor = new ThreadPoolExecutor(
-				maxThreads+1, maxThreads+1, 0L, TimeUnit.MILLISECONDS,
-	            new LinkedBlockingQueue<Runnable>());
-			executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+//			executor = new ThreadPoolExecutor(
+//				maxThreads+1, maxThreads+1, 0L, TimeUnit.MILLISECONDS,
+//	            new LinkedBlockingQueue<Runnable>());
+//			executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
 
+			serverExecutor = Executors.newSingleThreadExecutor();
 			// we can't allow the server to re-throw exceptions
 			jsonRpcServer.setRethrowExceptions(false);
 		}
@@ -107,7 +121,8 @@ public class LJServer {
 
 			// start the server
 			keepRunning.set(true);
-			executor.submit(new Server());
+			serverExecutor.submit(new StreamServer(maxClients));
+//			executor.submit(new Server());
 		}
 
 		/**
@@ -127,7 +142,8 @@ public class LJServer {
 			keepRunning.set(false);
 
 			// wait for the clients to stop
-			executor.shutdownNow();
+//			executor.shutdownNow();
+			serverExecutor.shutdownNow();
 
 			try {
 				serverSocket.close();
@@ -136,9 +152,12 @@ public class LJServer {
 			try {
 
 				// wait for it to finish
-				if (!executor.isTerminated()) {
-					executor.awaitTermination(
-						2000 + SERVER_SOCKET_SO_TIMEOUT, TimeUnit.MILLISECONDS);
+//				if (!executor.isTerminated()) {
+//					executor.awaitTermination(
+//						2000 + SERVER_SOCKET_SO_TIMEOUT, TimeUnit.MILLISECONDS);
+//				}
+				if(serverExecutor.isTerminated()){
+					serverExecutor.awaitTermination(2000 + SERVER_SOCKET_SO_TIMEOUT, TimeUnit.MILLISECONDS);
 				}
 
 				// set the flags
@@ -151,6 +170,43 @@ public class LJServer {
 			}
 		}
 
+		private class StreamServer implements Runnable {
+			private ThreadPoolExecutor clientHandleExecutors;
+			
+			public StreamServer(int maxClients) {
+				clientHandleExecutors= new ThreadPoolExecutor(maxClients, maxClients, 0, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+				clientHandleExecutors.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+			}
+
+			@Override
+			public void run() {
+				ServerSocket serverSocket= LJServer.this.serverSocket;
+				
+				while (LJServer.this.keepRunning.get()) {
+					try {
+						serverSocket.setSoTimeout(SERVER_SOCKET_SO_TIMEOUT);
+						
+						clientHandleExecutors.submit(new ClientHandle(serverSocket.accept()));
+					} catch (SocketTimeoutException e) {
+						// this is expected because of so_timeout
+
+					} catch(SSLException ssle) {
+						LOGGER.error( "SSLException while listening for clients, terminating", ssle);
+						break;
+						
+					} catch(IOException ioe) {
+						// this could be because the ServerSocket was closed
+						if (SocketException.class.isInstance(ioe) && !keepRunning.get()) {
+							break;
+						}
+						LOGGER.error( "Exception while listening for clients", ioe);
+					}
+					
+				}
+			}
+			
+		}
+		
 		/**
 		 * Server thread.
 		 */
@@ -208,17 +264,20 @@ public class LJServer {
 					LOGGER.error( "Client socket failed", e);
 					return;
 				}
+				ExecutorService executor= Executors.newSingleThreadExecutor();
+				InputStreamChecker inputChecker = new InputStreamChecker(input);
 
 				try {
-					clientSocket.setSoTimeout(5000);
 					// keep handling requests
 					int errors = 0;
 					int loop= -1;
 					while (LJServer.this.keepRunning.get() && clientSocket.isConnected()) {
 						LOGGER.debug(String.format("Loop %d: TO=%d", ++loop,clientSocket.getSoTimeout()));
 						
-						// handle it if keepalive
-						try {
+						Future<Integer> f= executor.submit(inputChecker);
+						if(f.get(8000, TimeUnit.MILLISECONDS) > 0){
+							// handle it if keepalive
+							try {
 //							if (input.available()==0) {
 //								Thread.yield();
 ////								if(input.read() < 0){
@@ -229,23 +288,29 @@ public class LJServer {
 ////							}
 //								continue;
 //							}
-							
-//							input.mark(10);
-//							input.read();
-//							input.reset();
-							jsonRpcServer.handle(input, output);
-						} catch (Throwable t) {
-							errors++;
-							if (errors<maxClientErrors) {
-								LOGGER.error( "Exception while handling request", t);
-							} else {
-								LOGGER.error( "Closing client connection due to repeated errors", t);
-								break;
+								
+								jsonRpcServer.handle(input, output);
+							} catch (Throwable t) {
+								errors++;
+								if (errors<maxClientErrors) {
+									LOGGER.error( "Exception while handling request", t);
+								} else {
+									LOGGER.error( "Closing client connection due to repeated errors", t);
+									break;
+								}
 							}
-						}
+						};
 					}
 				} catch (SocketException e1) {
 					LOGGER.info("Timeout !!!");
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (TimeoutException e) {
+					LOGGER.error("Timeout expired");
 				} finally {
 					// clean up
 					try {
@@ -253,6 +318,7 @@ public class LJServer {
 						input.close();
 						output.close();
 						LOGGER.info("Client disconnected");
+						LOGGER.debug(String.format("Estamted running tasks after: %d", LJServer.this.executor.getActiveCount()-1));
 					} catch (IOException e) { /* no-op */ }
 				}
 
@@ -281,4 +347,79 @@ public class LJServer {
 		}
 
 
+		private class ClientHandle implements Runnable{
+
+			private Socket socket;
+			private InputStreamChecker inputChecker;
+			private ExecutorService timerExecutor;
+			
+			public ClientHandle(Socket socket) {
+				// log the connection
+				LOGGER.info(
+					"Connection from "+socket.getInetAddress()+":"+socket.getPort());
+				this.socket= socket;
+				timerExecutor = Executors.newSingleThreadExecutor();
+				try {
+					inputChecker= new InputStreamChecker(socket.getInputStream());
+				} catch (IOException e) {
+					LOGGER.error("Client socket failed", e);
+				}
+			}
+			
+			@Override
+			public void run() {
+				try {
+					// keep handling requests
+					int errors = 0;
+					while (LJServer.this.keepRunning.get() && socket.isConnected()) {
+						Future<Integer> f= timerExecutor.submit(inputChecker);
+						if(f.get(DEFAULT_CLIENT_TIMEOUT, TimeUnit.MILLISECONDS) > 0){
+							try {
+								LOGGER.info("coucou");
+								jsonRpcServer.handle(socket.getInputStream(), socket.getOutputStream());
+							} catch (Throwable t) {
+								errors++;
+								if (errors<maxClientErrors) {
+									LOGGER.error( "Exception while handling request", t);
+								} else {
+									LOGGER.error( "Closing client connection due to repeated errors", t);
+									break;
+								}
+							}
+						};
+					}
+				} catch (InterruptedException e) {
+					LOGGER.error(e);
+				} catch (ExecutionException e) {
+					LOGGER.error(e);
+				} catch (TimeoutException e) {
+					LOGGER.warn(String.format("Timeout expired on %s",socket));
+				} finally {
+					// clean up
+					try {
+						socket.close();
+						LOGGER.info(String.format("Client %s:%d disconnected",socket.getInetAddress(),socket.getPort()));
+					} catch (IOException e) { /* no-op */ }
+				}
+			}
+		}
+		
+		private class InputStreamChecker implements Callable<Integer>{
+
+			InputStream in;
+			public InputStreamChecker(InputStream in) {
+				this.in= in;
+			}
+			@Override
+			public Integer call() throws Exception {
+				LOGGER.trace(String.format("Checking input %s", in.hashCode()));
+				 int res;
+				 while((res= in.available())<=0){ 
+					if(in.available() > 0){
+					}
+				}
+				return res;
+			}
+			
+		}
 }

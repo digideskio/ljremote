@@ -1,7 +1,5 @@
 package com.ljremote.client;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -9,11 +7,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.Socket;
-import java.net.UnknownHostException;
-
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JFrame;
+import java.util.logging.Logger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,10 +16,11 @@ import com.googlecode.jsonrpc4j.JsonRpcClient;
 import com.googlecode.jsonrpc4j.ReflectionUtil;
 import com.ljremote.json.services.ServerService;
 
-public class Main {
+public class LJClient implements Runnable {
 
-	private final static Log log = LogFactory.getLog(Main.class);
-
+	private static final Log log = LogFactory.getLog(LJClient.class);
+	private Socket socket;
+	
 	/**
 	 * Creates a {@link Proxy} of the given {@link proxyInterface} that uses the
 	 * given {@link JsonRpcClient}.
@@ -89,41 +84,19 @@ public class Main {
 				});
 	}
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-
-		Box box = Box.createVerticalBox();
-		JButton button;
-		try {
-			final LJClient client= new LJClient(new Socket("192.168.0.10",2508));
-			button = new JButton("Hello World");
-			button.addMouseListener(new MouseAdapter() {
-				
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					super.mouseClicked(e);
-					new Thread(client).start();
-				}
-				
-			});
-			box.add(button);
-			
-			JFrame frame = new JFrame();
-			frame.setContentPane(box);
-			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			frame.pack();
-			frame.setVisible(true);
-		} catch (UnknownHostException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
+	public LJClient(Socket socket) {
+		this.socket = socket;
 	}
 
-	
+	public void run() {
+		ServerService service;
+		try {
+			service = createClientProxy(LJClient.class.getClassLoader(),
+					ServerService.class, new JsonRpcClient(), socket);
+			log.info(service.helloWord());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
