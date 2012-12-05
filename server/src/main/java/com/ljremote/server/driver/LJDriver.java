@@ -1,13 +1,11 @@
 package com.ljremote.server.driver;
 
 import java.nio.ByteBuffer;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.sun.jna.Structure;
-import com.sun.jna.WString;
+import com.ljremote.server.exceptions.LJNotFoundException;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.LRESULT;
 
@@ -157,15 +155,23 @@ public class LJDriver {
 		return LJHandle;
 	}
 	
-	public boolean isLJReady(){
+	public void checkLJ() throws LJNotFoundException{
+		if(LJHandle != null){
+			throw new LJNotFoundException();
+		}
+	}
+	
+	public boolean isLJReady() throws LJNotFoundException{
 //		User32Ex.INSTANCE.PostMessage(LJHandle, LJMain.UMSG, new WPARAM(LJMain.Ready), new LPARAM(0));
+		checkLJ();
 		LRESULT ret = User32Ex.INSTANCE.SendMessageA(LJHandle, LJMain.UMSG, LJMain.Ready,0);
 		int ok = ret.intValue();
 		log.debug(String.format("LJReady : %d", ok));
 		return ok == 1;
 	}
 	
-	public String getLJVersion(){
+	public String getLJVersion() throws LJNotFoundException{
+		checkLJ();
 		LRESULT ret = User32Ex.INSTANCE.SendMessageA(LJHandle, LJMain.UMSG, LJMain.Version,0);
 		byte[] buf = ByteBuffer.allocate(4).putInt(ret.intValue()).array();
 		String ver= String.format("%d.%d.%d", buf[0],buf[1],buf[2]);

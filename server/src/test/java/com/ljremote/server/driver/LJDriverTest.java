@@ -1,9 +1,12 @@
 package com.ljremote.server.driver;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import org.junit.Before;
 import org.junit.Test;
+
+import com.ljremote.server.exceptions.LJNotFoundException;
 
 public class LJDriverTest {
 	
@@ -24,15 +27,24 @@ public class LJDriverTest {
 	public void testIsLJReady() {
 		LJDriver driver = new LJDriver();
 		driver.findLJ();
-		assertTrue(driver.isLJReady());
+		try {
+			assertTrue(driver.isLJReady());
+		} catch (LJNotFoundException e) {
+			fail(e.getMessage());
+		}
 	}
 	
 	@Test
 	public void testGetLJVersion(){
 		LJDriver driver = new LJDriver();
 		driver.findLJ();
-		String ver = driver.getLJVersion();
-		assertNotNull(ver);
+		String ver;
+		try {
+			ver = driver.getLJVersion();
+			assertNotNull(ver);
+		} catch (LJNotFoundException e) {
+			fail(e.getMessage());
+		}
 	}
 
 }

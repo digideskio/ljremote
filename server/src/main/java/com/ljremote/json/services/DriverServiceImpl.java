@@ -1,6 +1,7 @@
 package com.ljremote.json.services;
 
 import com.ljremote.server.driver.LJDriver;
+import com.ljremote.server.exceptions.LJNotFoundException;
 
 
 public class DriverServiceImpl extends AbstractLJService implements DriverService {
@@ -10,11 +11,19 @@ public class DriverServiceImpl extends AbstractLJService implements DriverServic
 	}
 
 	public boolean isLJready() {
-		return driver != null && driver.isLJReady();
+		try {
+			return driver != null && driver.isLJReady();
+		} catch (LJNotFoundException e) {
+			return false;
+		}
 	}
 
 	public String getLJversion() {
-		return driver ==null ? "" : driver.getLJVersion();
+		try {
+			return driver ==null ? "" : driver.getLJVersion();
+		} catch (LJNotFoundException e) {
+			return "0.0.0";
+		}
 	}
 
 }

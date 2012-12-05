@@ -1,6 +1,5 @@
 package com.ljremote.server.driver;
 
-import com.ljremote.server.driver.User32Ex.COPYDATASTRUCT;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;

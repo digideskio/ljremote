@@ -5,7 +5,6 @@ import java.net.ServerSocket;
 
 import com.googlecode.jsonrpc4j.JsonRpcServer;
 import com.googlecode.jsonrpc4j.ProxyUtil;
-import com.googlecode.jsonrpc4j.StreamServer;
 import com.ljremote.json.services.DriverService;
 import com.ljremote.json.services.DriverServiceImpl;
 import com.ljremote.json.services.ServerService;
@@ -20,7 +19,7 @@ public class Main {
 	public static void main(String[] args) {
 		LJDriver driver = new LJDriver();
 		driver.findLJ();
-		JSonServiceManager serviceManager = new JSonServiceManager();
+//		JSonServiceManager serviceManager = new JSonServiceManager();
 
 		 ServerService serverService = new ServerServicesImpl();
 		 DriverService driverService = new DriverServiceImpl(driver);

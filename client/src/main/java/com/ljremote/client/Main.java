@@ -20,7 +20,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.googlecode.jsonrpc4j.JsonRpcClient;
 import com.googlecode.jsonrpc4j.ReflectionUtil;
-import com.ljremote.json.services.ServerService;
 
 public class Main {
 
@@ -116,11 +115,9 @@ public class Main {
 			frame.pack();
 			frame.setVisible(true);
 		} catch (UnknownHostException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			log.error(e1);
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			log.error(e1);
 		}
 
 	}
