@@ -1,23 +1,54 @@
 package com.ljremote.json.exceptions;
 
+import java.lang.reflect.Method;
+import java.util.List;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.googlecode.jsonrpc4j.ErrorResolver;
 import com.googlecode.jsonrpc4j.ExceptionResolver;
 
-public class LJNotFoundException extends Exception implements JSonRpcResolver{
+public class LJNotFoundException extends Exception implements JSonRpcResolver {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -9222177114700047170L;
+	private static final int code = 1;
+
+	private final static ErrorResolver errorResolver = new ErrorResolver() {
+
+		@Override
+		public JsonError resolveError(Throwable t, Method method,
+				List<JsonNode> arguments) {
+			if (t instanceof LJNotFoundException) {
+				// LJNotFoundException e = (LJNotFoundException) t;
+				return new JsonError(code, LJNotFoundException.class.getName(),
+						null);
+			}
+			return null;
+		}
+	};
+	private static final ExceptionResolver exceptionResolveur = new ExceptionResolver() {
+		
+		@Override
+		public Throwable resolveException(ObjectNode response) {
+			// get the error object
+			ObjectNode errorObject = ObjectNode.class.cast(response.get("error"));
+			
+			if(errorObject.get("code").asInt() == code){
+				return new LJNotFoundException();
+			}
+			return null;
+		}
+	};
 
 	public ErrorResolver getErrorResolver() {
-		// TODO Auto-generated method stub
-		return null;
+		return errorResolver;
 	}
 
 	public ExceptionResolver getExceptionResolver() {
-		// TODO Auto-generated method stub
-		return null;
+		return exceptionResolveur;
 	}
 
 }
