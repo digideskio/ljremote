@@ -25,10 +25,10 @@ import com.ljremote.json.services.ServerService;
 public class JSonTestActivity extends FragmentActivity implements
 		OnClickListener {
 
-	static class ProxyUtil{
+	static class ProxyUtil {
 		/**
-		 * Creates a {@link Proxy} of the given {@link proxyInterface} that uses the
-		 * given {@link JsonRpcClient}.
+		 * Creates a {@link Proxy} of the given {@link proxyInterface} that uses
+		 * the given {@link JsonRpcClient}.
 		 * 
 		 * @param <T>
 		 *            the proxy type
@@ -43,17 +43,17 @@ public class JSonTestActivity extends FragmentActivity implements
 		 * @return the proxied interface
 		 */
 		public static <T> T createClientProxy(ClassLoader classLoader,
-				Class<T> proxyInterface, final JsonRpcClient client, Socket socket)
-				throws IOException {
+				Class<T> proxyInterface, final JsonRpcClient client,
+				Socket socket) throws IOException {
 
 			// create and return the proxy
-			return createClientProxy(classLoader, proxyInterface, false, client,
-					socket.getInputStream(), socket.getOutputStream());
+			return createClientProxy(classLoader, proxyInterface, false,
+					client, socket.getInputStream(), socket.getOutputStream());
 		}
 
 		/**
-		 * Creates a {@link Proxy} of the given {@link proxyInterface} that uses the
-		 * given {@link JsonRpcClient}.
+		 * Creates a {@link Proxy} of the given {@link proxyInterface} that uses
+		 * the given {@link JsonRpcClient}.
 		 * 
 		 * @param <T>
 		 *            the proxy type
@@ -82,13 +82,14 @@ public class JSonTestActivity extends FragmentActivity implements
 								Object[] args) throws Throwable {
 							Object arguments = ReflectionUtil.parseArguments(
 									method, args, useNamedParams);
-							return client.invokeAndReadResponse(method.getName(),
-									arguments, method.getGenericReturnType(), ops,
-									ips);
+							return client.invokeAndReadResponse(
+									method.getName(), arguments,
+									method.getGenericReturnType(), ops, ips);
 						}
 					});
 		}
 	}
+
 	private TextView jsonDisplay;
 	private JsonRpcClient jrpc;
 
@@ -102,6 +103,7 @@ public class JSonTestActivity extends FragmentActivity implements
 		((Button) findViewById(R.id.jsonHelloWorld)).setOnClickListener(this);
 		((Button) findViewById(R.id.jsonLJReady)).setOnClickListener(this);
 		((Button) findViewById(R.id.jsonLJVersion)).setOnClickListener(this);
+		((Button) findViewById(R.id.jsonException)).setOnClickListener(this);
 		jrpc = new JsonRpcClient();
 	}
 
@@ -122,12 +124,12 @@ public class JSonTestActivity extends FragmentActivity implements
 
 					switch (id) {
 					case R.id.jsonHelloWorld:
-						ret = 
-						ProxyUtil.createClientProxy(getClassLoader(), ServerService.class, jrpc, socket).helloWord();
-//						jrpc.invokeAndReadResponse("helloWord",
-//								new Object[] {}, String.class,
-//								socket.getOutputStream(),
-//								socket.getInputStream());
+						ret = ProxyUtil.createClientProxy(getClassLoader(),
+								ServerService.class, jrpc, socket).helloWord();
+						// jrpc.invokeAndReadResponse("helloWord",
+						// new Object[] {}, String.class,
+						// socket.getOutputStream(),
+						// socket.getInputStream());
 						break;
 					case R.id.jsonLJReady:
 						ret = String.valueOf(jrpc.invokeAndReadResponse(
@@ -141,6 +143,17 @@ public class JSonTestActivity extends FragmentActivity implements
 								socket.getOutputStream(),
 								socket.getInputStream());
 						break;
+					case R.id.jsonException:
+						try {
+							ProxyUtil
+									.createClientProxy(getClassLoader(),
+											ServerService.class, jrpc, socket)
+									.iWantMyException(
+											new IllegalArgumentException(
+													"Tout le monde veut le coco"));
+						} catch (IllegalArgumentException e) {
+							ret = e.getMessage();
+						}
 					default:
 						break;
 					}

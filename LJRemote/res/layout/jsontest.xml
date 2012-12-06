@@ -22,6 +22,12 @@
         android:layout_height="wrap_content"
         android:text="LJ Version ?" />
 
+    <Button
+        android:id="@+id/jsonException"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="I want my exception" />
+
     <TextView
         android:id="@+id/jsonDisplay"
         android:layout_width="match_parent"

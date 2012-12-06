@@ -20,4 +20,6 @@ public interface ServerService {
 	 * Close session
 	 */
 	void closeSession();
+	
+	void iWantMyException(Exception e) throws Exception;
 }

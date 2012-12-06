@@ -92,10 +92,12 @@ public class LJClient implements Runnable {
 		try {
 			service = createClientProxy(LJClient.class.getClassLoader(),
 					ServerService.class, new JsonRpcClient(), socket);
-			log.info(service.helloWord());
+			service.iWantMyException(new IllegalArgumentException("Tout le monde veut le coco"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (Exception e) {
+			log.info(e);
 		}
 	}
 }

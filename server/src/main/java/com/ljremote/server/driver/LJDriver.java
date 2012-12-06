@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.ljremote.server.exceptions.LJNotFoundException;
+import com.ljremote.json.exceptions.LJNotFoundException;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.LRESULT;
 
@@ -78,7 +78,7 @@ public class LJDriver {
 		 * 			-1 => clear flash
 		 */
 	}
-	final static class BGCue{
+	final class BGCue{
 		final static int UMSG = WM_USER + 1005;
 		final static int CLEAR = 0;
 		/*
@@ -87,7 +87,7 @@ public class LJDriver {
 		 */
 	}
 	
-	final static class Statics{
+	public final class Statics{
 		final static int UMSG = WM_USER + 1011;
 		final static int DISABLE = 0; //lParam = Static entry# (0-19)
 		final static int ENABLE = 1; //lParam = Static entry# (0-19)
@@ -103,6 +103,17 @@ public class LJDriver {
 		 */
 		final static int BitMappedAllOff= 0;
 		final static int BitMappedAllOn= 0xFFFFF000;
+		
+		public final static int MAX_ID= 19;
+		
+		public void enableStatic(int id, boolean enable) throws LJNotFoundException{
+			checkLJ();
+			if(id <0 || id> MAX_ID){
+				throw new IllegalArgumentException(String.format("Static id should belong to [0-19], current= %d", id));
+			}
+			int wParam= enable ? 1 : 0;
+			log.trace(User32Ex.INSTANCE.SendMessageA(LJHandle, UMSG, wParam, id));
+		}
 	}
 	
 	final static class ExternalConfiguration{
@@ -143,7 +154,7 @@ public class LJDriver {
 	
 	HWND LJHandle = null;
 	
-	
+	Statics statics= null;
 	
 	public boolean findLJ(){
 		LJHandle = User32Ex.INSTANCE.FindWindowA(LJWindowClassName, null);
@@ -177,5 +188,9 @@ public class LJDriver {
 		String ver= String.format("%d.%d.%d", buf[0],buf[1],buf[2]);
 		log.info(String.format("LJVersion : %s", ver));
 		return ver;
+	}
+	
+	public Statics statics() {
+		return statics == null ? statics= new Statics(): statics;
 	}
 }

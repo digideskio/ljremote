@@ -6,7 +6,7 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import com.ljremote.server.exceptions.LJNotFoundException;
+import com.ljremote.json.exceptions.LJNotFoundException;
 
 public class LJDriverTest {
 	

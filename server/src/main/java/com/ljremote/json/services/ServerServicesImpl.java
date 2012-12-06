@@ -24,4 +24,9 @@ public class ServerServicesImpl implements ServerService{
 		
 	}
 
+	@Override
+	public void iWantMyException(Exception e) throws Exception {
+		throw e;
+	}
+
 }
