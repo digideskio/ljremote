@@ -16,14 +16,15 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.ljremote.android.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name" android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".json.JSonTestActivity"></activity>
+        <activity android:name=".json.JSonTestActivity" android:screenOrientation="landscape"></activity>
+        <service android:name=".json.LJClientService"></service>
     </application>
 
 </manifest>

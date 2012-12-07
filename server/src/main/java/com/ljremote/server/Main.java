@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 
 import com.googlecode.jsonrpc4j.JsonRpcServer;
 import com.googlecode.jsonrpc4j.ProxyUtil;
+import com.ljremote.json.exceptions.LJNotFoundException;
 import com.ljremote.json.services.DriverService;
 import com.ljremote.json.services.DriverServiceImpl;
 import com.ljremote.json.services.ServerService;
@@ -42,6 +43,7 @@ public class Main {
 							new Class<?>[] { ServerService.class,
 							DriverService.class, }, true));
 
+		jsonRpcServer.setErrorResolver(new LJNotFoundException().getErrorResolver());
 		int maxThreads = 5;
 		int port = 2508;
 		try {

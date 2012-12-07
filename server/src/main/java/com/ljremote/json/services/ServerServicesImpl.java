@@ -14,8 +14,7 @@ public class ServerServicesImpl implements ServerService{
 	}
 
 	@Override
-	public boolean hello() {
-		return true;
+	public void hello() {
 	}
 
 	@Override

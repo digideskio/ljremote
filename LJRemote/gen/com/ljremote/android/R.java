@@ -21,25 +21,26 @@ public final class R {
     public static final class id {
         public static final int RelativeLayout1=0x7f080000;
         public static final int detail_container=0x7f080002;
-        public static final int frameLayout1=0x7f080012;
-        public static final int id=0x7f08000a;
-        public static final int imageView1=0x7f080011;
-        public static final int intensity=0x7f08000e;
-        public static final int jsonDisplay=0x7f080006;
+        public static final int frameLayout1=0x7f080013;
+        public static final int id=0x7f08000b;
+        public static final int imageView1=0x7f080012;
+        public static final int intensity=0x7f08000f;
+        public static final int jsonDisplay=0x7f080007;
+        public static final int jsonException=0x7f080006;
         public static final int jsonHelloWorld=0x7f080003;
         public static final int jsonLJReady=0x7f080004;
         public static final int jsonLJVersion=0x7f080005;
-        public static final int label=0x7f08000b;
-        public static final int menu=0x7f080007;
+        public static final int label=0x7f08000c;
+        public static final int menu=0x7f080008;
         public static final int menu_container=0x7f080001;
-        public static final int menu_settings=0x7f080013;
-        public static final int menu_testjson=0x7f080014;
-        public static final int mstr_int_list=0x7f080008;
-        public static final int seek_int=0x7f080009;
-        public static final int seek_intensity=0x7f08000f;
-        public static final int sliding_main=0x7f080010;
-        public static final int static_list=0x7f08000c;
-        public static final int toggle=0x7f08000d;
+        public static final int menu_settings=0x7f080014;
+        public static final int menu_testjson=0x7f080015;
+        public static final int mstr_int_list=0x7f080009;
+        public static final int seek_int=0x7f08000a;
+        public static final int seek_intensity=0x7f080010;
+        public static final int sliding_main=0x7f080011;
+        public static final int static_list=0x7f08000d;
+        public static final int toggle=0x7f08000e;
     }
     public static final class integer {
         public static final int NUM_MAX_LENGTH=0x7f040000;

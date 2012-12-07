@@ -26,4 +26,11 @@ public class DriverServiceImpl extends AbstractLJService implements DriverServic
 		}
 	}
 
+	@Override
+	public void findLJ() throws LJNotFoundException {
+		if(!driver.findLJ()){
+			throw new LJNotFoundException();
+		}
+	}
+
 }

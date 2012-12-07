@@ -14,7 +14,7 @@ public interface ServerService {
 	 * Send hello to keep the session alive
 	 * @return true if session still alive
 	 */
-	boolean hello();
+	void hello();
 	
 	/**
 	 * Close session
