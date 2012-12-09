@@ -26,9 +26,12 @@ import com.ljremote.android.fragments.MenuFragment;
 import com.ljremote.android.fragments.SequenceFragment;
 import com.ljremote.android.fragments.StaticFragment;
 import com.ljremote.android.json.JSonTestActivity;
+import com.ljremote.android.json.LJClientService;
+import com.ljremote.android.json.LJClientService.MODE;
+import com.ljremote.android.json.LJClientService.OnModeChangeListener;
 
 public class MainActivity extends FragmentActivity implements
-		MenuFragment.OnArticleSelectedListener {
+		MenuFragment.OnArticleSelectedListener, LJClientService.OnModeChangeListener {
 
 	private final static String TAG = "Main";
 	private DataManager dm;
@@ -38,6 +41,7 @@ public class MainActivity extends FragmentActivity implements
 
 	private final static String STATE_LAST_LOAD_FRAGMENT_POS = "last_load_fragment_position";
 	private int lastLoadFragmentPosition;
+	private LJClientService ljService;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,9 +80,19 @@ public class MainActivity extends FragmentActivity implements
 			return true;
 		case R.id.menu_testjson:
 			startActivity(new Intent(this, JSonTestActivity.class));
+			break;
+		case R.id.menu_mode_bound:
+			onModeChange(MODE.BOUND);
+			break;
+		case R.id.menu_mode_unbound:
+			onModeChange(MODE.UNBOUND);
+			break;
+		case R.id.menu_mode_drive:
+			onModeChange(MODE.DRIVE);
+			break;
 		default:
-			return super.onOptionsItemSelected(item);
 		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	public boolean deviceIsLargeScreen() {
@@ -180,5 +194,10 @@ public class MainActivity extends FragmentActivity implements
 			menu.setVisibility(View.VISIBLE);
 			findViewById(R.id.detail_container).setVisibility(View.GONE);
 		}
+	}
+
+	@Override
+	public void onModeChange(MODE newMode) {
+		menuFragment.changeServerMode(newMode);
 	}
 }

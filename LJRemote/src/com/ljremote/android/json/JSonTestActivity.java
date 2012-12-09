@@ -1,13 +1,5 @@
 package com.ljremote.android.json;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.net.MalformedURLException;
-import java.net.Socket;
 import java.net.UnknownHostException;
 
 import android.content.ComponentName;
@@ -17,18 +9,14 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.googlecode.jsonrpc4j.JsonRpcClient;
-import com.googlecode.jsonrpc4j.ReflectionUtil;
 import com.ljremote.android.R;
 import com.ljremote.android.json.LJClientService.LocalBinder;
 import com.ljremote.android.json.LJClientService.MODE;
-import com.ljremote.json.services.ServerService;
 
 public class JSonTestActivity extends FragmentActivity implements
 		OnClickListener {
@@ -45,11 +33,11 @@ public class JSonTestActivity extends FragmentActivity implements
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			ljService = ((LocalBinder) service).getService();
-			ljService.setOnModeChangeListener(new LJClientService.OnModeChangeListener() {
+			ljService.registerOnModeChangeListener(new LJClientService.OnModeChangeListener() {
 				
 				@Override
 				public void onModeChange(MODE newMode) {
-					jsonDisplay.append("/n" + newMode);
+					jsonDisplay.append("\n" + newMode);
 					if(newMode == MODE.BOUND){
 						ljService.drive();
 					}
@@ -100,9 +88,8 @@ public class JSonTestActivity extends FragmentActivity implements
 	private void processJSon(final int id) {
 		Thread thread = new Thread() {
 			public void run() {
-				Socket socket = null;
 				try {
-					socket = new Socket("192.168.0.10", 2508);
+//					socket = new Socket("192.168.0.10", 2508);
 					String ret = null;
 
 					// getClassLoader().loadClass(ServerService.class.getName());
@@ -162,27 +149,27 @@ public class JSonTestActivity extends FragmentActivity implements
 							jsonDisplay.append(toShow);
 						}
 					});
-				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (UnknownHostException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+//				} catch (MalformedURLException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (UnknownHostException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
 				} catch (Throwable e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} finally {
-					if (socket != null) {
-						try {
-							socket.close();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
+//					if (socket != null) {
+//						try {
+////							socket.close();
+//						} catch (IOException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+//					}
 				}
 			}
 		};

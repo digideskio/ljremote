@@ -1,23 +1,15 @@
 package com.ljremote.android.fragments;
 
-import java.util.List;
-
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.SeekBar;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.ljremote.android.MainActivity;
 import com.ljremote.android.R;
 import com.ljremote.android.adapters.StaticCursorAdapter;
 import com.ljremote.android.adapters.StaticListAdapter;
-import com.ljremote.android.data.DataManager.TABLES;
-import com.ljremote.android.types.Static;
 
 public class StaticFragment extends AbstractDetailFragment {
 	

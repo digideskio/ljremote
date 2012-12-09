@@ -60,7 +60,7 @@ public interface User32Ex extends com.sun.jna.platform.win32.User32 {
 		WString lpData;
 		
 		@Override
-		protected List getFieldOrder() {
+		protected List<?> getFieldOrder() {
 			// TODO Auto-generated method stub
 			return null;
 		}
@@ -80,7 +80,7 @@ public interface User32Ex extends com.sun.jna.platform.win32.User32 {
 		WString name;
 		
 		@Override
-		protected List getFieldOrder() {
+		protected List<?> getFieldOrder() {
 			// TODO Auto-generated method stub
 			return null;
 		}

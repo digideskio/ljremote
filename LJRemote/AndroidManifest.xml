@@ -25,6 +25,7 @@
         </activity>
         <activity android:name=".json.JSonTestActivity" android:screenOrientation="landscape"></activity>
         <service android:name=".json.LJClientService"></service>
+        <receiver android:name=".json.KeepAliveAlarm"></receiver>
     </application>
 
 </manifest>

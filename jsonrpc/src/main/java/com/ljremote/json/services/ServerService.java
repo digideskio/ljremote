@@ -1,5 +1,7 @@
 package com.ljremote.json.services;
 
+import com.ljremote.json.model.SessionConfig;
+
 public interface ServerService {
 
 	String helloWord();
@@ -8,7 +10,7 @@ public interface ServerService {
 	 * Connect to server and open session
 	 * @return client timeout, -1 if connection refused, 0 for no timeout
 	 */
-	int connect();
+	SessionConfig connect();
 	
 	/**
 	 * Send hello to keep the session alive
@@ -19,7 +21,7 @@ public interface ServerService {
 	/**
 	 * Close session
 	 */
-	void closeSession();
+	void closeSession(int id);
 	
 	void iWantMyException(Exception e) throws Exception;
 }

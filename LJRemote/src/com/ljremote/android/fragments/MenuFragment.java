@@ -9,10 +9,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.ljremote.android.MainActivity;
 import com.ljremote.android.R;
+import com.ljremote.android.json.LJClientService.MODE;
 
 public class MenuFragment extends Fragment implements OnItemClickListener {
 	OnArticleSelectedListener listener;
@@ -42,6 +45,9 @@ public class MenuFragment extends Fragment implements OnItemClickListener {
 //	private final static int MENU_MSTR_INT_POS = 5;
 	
 	View mainView= null;
+private ImageView server_mode_icon;
+
+private TextView server_mode_text;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -81,12 +87,36 @@ public class MenuFragment extends Fragment implements OnItemClickListener {
 	public void updateList(){
 		if(mainView != null){
 			menu = (ListView) mainView.findViewById(R.id.menu);
+			server_mode_icon = (ImageView) mainView.findViewById(R.id.server_mode_icon);
+			server_mode_text = (TextView) mainView.findViewById(R.id.server_mode_text);
+			
 			
 			ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
 					android.R.layout.simple_list_item_1, ((MainActivity) getActivity()).getFragmentLabels());
 			menu.setAdapter(adapter);
 			menu.setOnItemClickListener(this);		
 		}
+	}
+
+	public void changeServerMode(MODE newMode) {
+		int icon_id;
+		int text_id;
+		switch (newMode) {
+		case DRIVE:
+			icon_id= R.drawable.ic_menu_cycle_green;
+			text_id= R.string.server_mode_driver;
+			break;
+		case BOUND:
+			icon_id= R.drawable.ic_menu_cycle_orange;
+			text_id= R.string.server_mode_bound;
+			break;
+		default:
+			icon_id= R.drawable.ic_menu_cycle_red;
+			text_id= R.string.server_mode_unbound;
+			break;
+		}
+		server_mode_icon.setImageResource(icon_id);
+		server_mode_text.setText(text_id);
 	}
 
 	// @Override

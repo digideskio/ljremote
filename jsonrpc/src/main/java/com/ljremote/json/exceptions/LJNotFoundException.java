@@ -1,8 +1,6 @@
 package com.ljremote.json.exceptions;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.UndeclaredThrowableException;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,17 +20,18 @@ public class LJNotFoundException extends RuntimeException implements JSonRpcReso
 
 		public JsonError resolveError(Throwable t, Method method,
 				List<JsonNode> arguments) {
-			if (t instanceof LJNotFoundException) {
-				// LJNotFoundException e = (LJNotFoundException) t;
-				return new JsonError(code, LJNotFoundException.class.getName(),
-						null);
-			} else if (t instanceof UndeclaredThrowableException) {
-				if(((UndeclaredThrowableException) t).getUndeclaredThrowable().getCause() instanceof LJNotFoundException){
-					return new JsonError(code, LJNotFoundException.class.getName(),
-							null);
-				}
-			}
-			return null;
+			LJNotFoundException e = ExceptionsUtils.tryGettingCorrectThrown(t, LJNotFoundException.class);
+//			if (t instanceof LJNotFoundException) {
+//				// LJNotFoundException e = (LJNotFoundException) t;
+//				return new JsonError(code, LJNotFoundException.class.getName(),
+//						null);
+//			} else if (t instanceof UndeclaredThrowableException) {
+//				if(((UndeclaredThrowableException) t).getUndeclaredThrowable().getCause() instanceof LJNotFoundException){
+//					return new JsonError(code, LJNotFoundException.class.getName(),
+//							null);
+//				}
+//			}
+			return e == null ? null : new JsonError(code, LJNotFoundException.class.getName(),null);
 		}
 	};
 	private static final ExceptionResolver exceptionResolveur = new ExceptionResolver() {

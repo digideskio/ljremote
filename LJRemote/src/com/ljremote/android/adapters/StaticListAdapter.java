@@ -3,11 +3,8 @@ package com.ljremote.android.adapters;
 import java.util.List;
 
 import android.content.Context;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -94,20 +91,6 @@ public class StaticListAdapter extends ArrayAdapter<Static> {
 					boolean fromUser) {
 				// TODO Auto-generated method stub
 				
-			}
-		});
-	}
-
-	private void attachStateUpdater(View view, final int position){
-		view.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				Static s= getItem(position);
-//				if (((MainActivity) getContext()).getDataManager().updateStaticIntensity(s.getId(), progress)){
-////					s.toggleState();
-//				}
-				notifyDataSetChanged();
 			}
 		});
 	}

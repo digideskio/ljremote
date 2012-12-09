@@ -1,6 +1,6 @@
 package com.ljremote.json.services;
 
-import com.ljremote.server.LJServer;
+import com.ljremote.json.model.SessionConfig;
 
 public class ServerServicesImpl implements ServerService{
 
@@ -8,24 +8,26 @@ public class ServerServicesImpl implements ServerService{
 		return "Hello world !";
 	}
 
-	@Override
-	public int connect() {
-		return (int) LJServer.DEFAULT_CLIENT_TIMEOUT;
-	}
 
 	@Override
 	public void hello() {
 	}
 
-	@Override
-	public void closeSession() {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public void iWantMyException(Exception e) throws Exception {
 		throw e;
+	}
+
+
+	@Override
+	public SessionConfig connect() {
+		return new SessionConfig(0, 0);
+	}
+
+
+	@Override
+	public void closeSession(int id) {
 	}
 
 }

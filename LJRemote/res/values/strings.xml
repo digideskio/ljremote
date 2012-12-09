@@ -6,5 +6,8 @@
     <string name="menu_settings">Settings</string>
     <string name="toggle">Toggle</string>
     <string name="menu_testjson">Json RPC</string>
+    <string name="server_mode_unbound">No server</string>
+    <string name="server_mode_bound">Bound to server</string>
+    <string name="server_mode_driver">Driving LJ</string>
 
 </resources>
