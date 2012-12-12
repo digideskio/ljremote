@@ -10,14 +10,26 @@ import org.apache.log4j.spi.LoggingEvent;
 
 public class JTextPaneAppender extends AppenderSkeleton {
 	
-	private JTextPane textPane;
-	private StyledDocument doc;
+	private static JTextPane textPane;
+	private static StyledDocument doc;
 
 	public JTextPaneAppender(){
-		this.textPane= new JTextPane();
-		doc= textPane.getStyledDocument();
+		if(doc == null){
+			textPane= new JTextPane();
+			textPane.setEditable(false);
+			doc= textPane.getStyledDocument();
+		}
 	}
 	
+	
+	
+	@Override
+	public void activateOptions() {
+		super.activateOptions();
+	}
+
+
+
 	@Override
 	protected void append(LoggingEvent arg0) {
 		final String message = layout.format(arg0);
@@ -49,7 +61,12 @@ public class JTextPaneAppender extends AppenderSkeleton {
 		return textPane;
 	}
 	
+	/**
+	 * @wbp.factory
+	 * @return
+	 */
 	public static JTextPane createJTextPaneAppender(){
 		return new JTextPaneAppender().getView();
 	}
+	
 }

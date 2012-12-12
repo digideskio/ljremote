@@ -1,13 +1,16 @@
 package com.ljremote.server.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.ServerSocket;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
@@ -21,6 +24,7 @@ import javax.swing.JTable;
 import javax.swing.JTextPane;
 import javax.swing.JToolBar;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.SpringLayout;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
@@ -117,12 +121,14 @@ public class MainWindow implements OnServerStatusChangeListener, ClientConnectio
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(status)
 					.addContainerGap(321, Short.MAX_VALUE))
-				.addComponent(panel_2, GroupLayout.DEFAULT_SIZE, 417, Short.MAX_VALUE)
 				.addGroup(gl_panel_1.createSequentialGroup()
 					.addComponent(lblClients)
 					.addGap(18)
 					.addComponent(clientNumber)
 					.addGap(317))
+				.addGroup(gl_panel_1.createSequentialGroup()
+					.addComponent(panel_2, GroupLayout.DEFAULT_SIZE, 426, Short.MAX_VALUE)
+					.addContainerGap())
 		);
 		gl_panel_1.setVerticalGroup(
 			gl_panel_1.createParallelGroup(Alignment.LEADING)
@@ -134,8 +140,9 @@ public class MainWindow implements OnServerStatusChangeListener, ClientConnectio
 					.addGroup(gl_panel_1.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblClients)
 						.addComponent(clientNumber))
-					.addPreferredGap(ComponentPlacement.RELATED, 140, Short.MAX_VALUE)
-					.addComponent(panel_2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(panel_2, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
 
 		btnStart = new JButton("Start");
@@ -156,18 +163,29 @@ public class MainWindow implements OnServerStatusChangeListener, ClientConnectio
 		});
 		panel_2.add(btnStop);
 		panel_1.setLayout(gl_panel_1);
+		
+		Component verticalGlue = Box.createVerticalGlue();
+		generalPanel.add(verticalGlue);
 
 		JPanel panel = new JPanel();
 		tabbedPane.addTab("Log", null, panel, null);
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		SpringLayout sl_panel = new SpringLayout();
+		panel.setLayout(sl_panel);
 
 		JToolBar toolBar = new JToolBar();
+		sl_panel.putConstraint(SpringLayout.NORTH, toolBar, 0, SpringLayout.NORTH, panel);
+		sl_panel.putConstraint(SpringLayout.WEST, toolBar, 0, SpringLayout.WEST, panel);
+		sl_panel.putConstraint(SpringLayout.SOUTH, toolBar, 22, SpringLayout.NORTH, panel);
+		sl_panel.putConstraint(SpringLayout.EAST, toolBar, 0, SpringLayout.EAST, panel);
+		toolBar.setRollover(true);
+		toolBar.setFloatable(false);
 		panel.add(toolBar);
 
 		JLabel lblLevel = new JLabel("Level:");
 		toolBar.add(lblLevel);
 
 		JComboBox comboBox = new JComboBox();
+		comboBox.setModel(new DefaultComboBoxModel(new String[] {"ALL", "TRACE", "INFO", "DEBUG"}));
 		toolBar.add(comboBox);
 
 		JButton btnClear = new JButton("Clear");
@@ -179,13 +197,26 @@ public class MainWindow implements OnServerStatusChangeListener, ClientConnectio
 		});
 		toolBar.add(btnClear);
 		
+		
+		JScrollPane scrollPane_1 = new JScrollPane();
+		sl_panel.putConstraint(SpringLayout.NORTH, scrollPane_1, 3, SpringLayout.SOUTH, toolBar);
+		sl_panel.putConstraint(SpringLayout.WEST, scrollPane_1, 0, SpringLayout.WEST, panel);
+		sl_panel.putConstraint(SpringLayout.SOUTH, scrollPane_1, 0, SpringLayout.SOUTH, panel);
+		sl_panel.putConstraint(SpringLayout.EAST, scrollPane_1, 0, SpringLayout.EAST, panel);
 		logPane = JTextPaneAppender.createJTextPaneAppender();
-		panel.add(logPane);
+		scrollPane_1.setViewportView(logPane);
+		panel.add(scrollPane_1);
 		
 		JPanel panel_3 = new JPanel();
 		tabbedPane.addTab("Clients", null, panel_3, null);
+		SpringLayout sl_panel_3 = new SpringLayout();
+		panel_3.setLayout(sl_panel_3);
 		
 		JScrollPane scrollPane = new JScrollPane();
+		sl_panel_3.putConstraint(SpringLayout.NORTH, scrollPane, 0, SpringLayout.NORTH, panel_3);
+		sl_panel_3.putConstraint(SpringLayout.WEST, scrollPane, 0, SpringLayout.WEST, panel_3);
+		sl_panel_3.putConstraint(SpringLayout.SOUTH, scrollPane, 0, SpringLayout.SOUTH, panel_3);
+		sl_panel_3.putConstraint(SpringLayout.EAST, scrollPane, 0, SpringLayout.EAST, panel_3);
 		panel_3.add(scrollPane);
 		
 		clientTabble = new JTable();
@@ -205,6 +236,7 @@ public class MainWindow implements OnServerStatusChangeListener, ClientConnectio
 				return columnTypes[columnIndex];
 			}
 		});
+		
 		clientTabble.getColumnModel().getColumn(0).setResizable(false);
 		clientTabble.getColumnModel().getColumn(1).setResizable(false);
 		clientTabble.getColumnModel().getColumn(2).setResizable(false);

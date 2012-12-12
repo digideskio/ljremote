@@ -207,7 +207,7 @@ public class LJServer {
 		try {
 
 			// wait for it to finish
-			if (serverExecutor.isTerminated()) {
+			if (!serverExecutor.isTerminated()) {
 				serverExecutor.awaitTermination(
 						2000 + SERVER_SOCKET_SO_TIMEOUT, TimeUnit.MILLISECONDS);
 			}
