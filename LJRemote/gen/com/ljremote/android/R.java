@@ -11,36 +11,53 @@ public final class R {
     public static final class attr {
     }
     public static final class drawable {
-        public static final int blue=0x7f020003;
-        public static final int green=0x7f020004;
+        public static final int blue=0x7f020006;
+        public static final int green=0x7f020007;
         public static final int ic_launcher=0x7f020000;
-        public static final int red=0x7f020002;
-        public static final int static_list_selector=0x7f020001;
-        public static final int yellow=0x7f020005;
+        public static final int ic_menu_cycle_green=0x7f020001;
+        public static final int ic_menu_cycle_orange=0x7f020002;
+        public static final int ic_menu_cycle_red=0x7f020003;
+        public static final int red=0x7f020005;
+        public static final int static_list_selector=0x7f020004;
+        public static final int yellow=0x7f020008;
     }
     public static final class id {
         public static final int RelativeLayout1=0x7f080000;
+        public static final int Space1=0x7f08000c;
         public static final int detail_container=0x7f080002;
-        public static final int frameLayout1=0x7f080013;
-        public static final int id=0x7f08000b;
-        public static final int imageView1=0x7f080012;
-        public static final int intensity=0x7f08000f;
-        public static final int jsonDisplay=0x7f080007;
-        public static final int jsonException=0x7f080006;
-        public static final int jsonHelloWorld=0x7f080003;
-        public static final int jsonLJReady=0x7f080004;
-        public static final int jsonLJVersion=0x7f080005;
-        public static final int label=0x7f08000c;
-        public static final int menu=0x7f080008;
+        public static final int frameLayout1=0x7f08001c;
+        public static final int frggtgthth=0x7f080003;
+        public static final int id=0x7f080014;
+        public static final int imageView1=0x7f08001b;
+        public static final int intensity=0x7f080018;
+        public static final int jsonConnect=0x7f080004;
+        public static final int jsonDisconnect=0x7f080005;
+        public static final int jsonDisplay=0x7f08000b;
+        public static final int jsonDrive=0x7f08000d;
+        public static final int jsonException=0x7f08000a;
+        public static final int jsonHelloWorld=0x7f080008;
+        public static final int jsonLJReady=0x7f080007;
+        public static final int jsonLJVersion=0x7f080009;
+        public static final int jsonUnDrive=0x7f08000e;
+        public static final int label=0x7f080015;
+        public static final int menu=0x7f080011;
+        public static final int menu_change_mode=0x7f08001f;
+        public static final int menu_change_mode_groupe=0x7f080020;
         public static final int menu_container=0x7f080001;
-        public static final int menu_settings=0x7f080014;
-        public static final int menu_testjson=0x7f080015;
-        public static final int mstr_int_list=0x7f080009;
-        public static final int seek_int=0x7f08000a;
-        public static final int seek_intensity=0x7f080010;
-        public static final int sliding_main=0x7f080011;
-        public static final int static_list=0x7f08000d;
-        public static final int toggle=0x7f08000e;
+        public static final int menu_mode_bound=0x7f080022;
+        public static final int menu_mode_drive=0x7f080023;
+        public static final int menu_mode_unbound=0x7f080021;
+        public static final int menu_settings=0x7f08001d;
+        public static final int menu_testjson=0x7f08001e;
+        public static final int mstr_int_list=0x7f080012;
+        public static final int seek_int=0x7f080013;
+        public static final int seek_intensity=0x7f080019;
+        public static final int server_mode_icon=0x7f08000f;
+        public static final int server_mode_text=0x7f080010;
+        public static final int sliding_main=0x7f08001a;
+        public static final int static_list=0x7f080016;
+        public static final int toggle=0x7f080017;
+        public static final int view1=0x7f080006;
     }
     public static final class integer {
         public static final int NUM_MAX_LENGTH=0x7f040000;
@@ -74,6 +91,9 @@ public final class R {
         public static final int menu_testjson=0x7f05000a;
         public static final int mstr_int=0x7f050004;
         public static final int sequences=0x7f050000;
+        public static final int server_mode_bound=0x7f05000c;
+        public static final int server_mode_driver=0x7f05000d;
+        public static final int server_mode_unbound=0x7f05000b;
         public static final int statics=0x7f050001;
         public static final int toggle=0x7f050009;
     }

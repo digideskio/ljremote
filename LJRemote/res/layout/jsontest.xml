@@ -1,37 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/frggtgthth"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="match_parent" >
 
-    <Button
-        android:id="@+id/jsonHelloWorld"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Hello World !" />
-
-    <Button
-        android:id="@+id/jsonLJReady"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="LJ Ready ?" />
-
-    <Button
-        android:id="@+id/jsonLJVersion"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="LJ Version ?" />
-
-    <Button
-        android:id="@+id/jsonException"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="I want my exception" />
-
-    <TextView
-        android:id="@+id/jsonDisplay"
+    <RelativeLayout
+        android:id="@+id/RelativeLayout1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Results:" />
+        android:columnCount="3"
+        android:columnOrderPreserved="false"
+        android:orientation="horizontal"
+        android:useDefaultMargins="false" >
 
-</LinearLayout>
+        <Button
+            android:id="@+id/jsonConnect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/jsonDisconnect"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignRight="@+id/view1"
+            android:layout_column="0"
+            android:layout_gravity="left"
+            android:layout_row="0"
+            android:text="Connect" />
+
+        <Button
+            android:id="@+id/jsonDisconnect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/view1"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_column="1"
+            android:layout_gravity="right"
+            android:layout_row="0"
+            android:text="Disconnect" />
+
+        <Button
+            android:id="@+id/jsonLJReady"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/jsonConnect"
+            android:layout_alignRight="@+id/view1"
+            android:layout_below="@+id/jsonHelloWorld"
+            android:layout_column="0"
+            android:layout_gravity="left"
+            android:layout_row="2"
+            android:text="LJ Ready ?" />
+
+        <Button
+            android:id="@+id/jsonLJVersion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@+id/jsonLJReady"
+            android:layout_column="1"
+            android:layout_gravity="right"
+            android:layout_row="2"
+            android:layout_toRightOf="@+id/view1"
+            android:text="LJ Version ?" />
+
+        <Button
+            android:id="@+id/jsonException"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/jsonConnect"
+            android:layout_below="@+id/jsonLJReady"
+            android:layout_column="0"
+            android:layout_columnSpan="3"
+            android:layout_gravity="left|bottom"
+            android:layout_row="3"
+            android:text="I want my exception" />
+
+        <TextView
+            android:id="@+id/jsonDisplay"
+            android:layout_width="match_parent"
+            android:layout_height="500dp"
+            android:layout_alignLeft="@+id/jsonConnect"
+            android:layout_below="@+id/jsonException"
+            android:layout_column="0"
+            android:layout_columnSpan="2"
+            android:layout_gravity="left|bottom"
+            android:layout_row="4"
+            android:text="Results:" />
+
+        <Space
+            android:id="@+id/Space1"
+            android:layout_width="21dp"
+            android:layout_height="1dp"
+            android:layout_column="0"
+            android:layout_row="0" />
+
+        <View
+            android:id="@+id/view1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:id="@+id/jsonDrive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@+id/view1"
+            android:layout_below="@+id/jsonConnect"
+            android:text="Drive" />
+
+        <Button
+            android:id="@+id/jsonUnDrive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/jsonDisconnect"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/jsonDisconnect"
+            android:text="UnDrive" />
+
+        <Button
+            android:id="@+id/jsonHelloWorld"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/jsonDrive"
+            android:text="Hello World !" />
+    </RelativeLayout>
+
+</ScrollView>

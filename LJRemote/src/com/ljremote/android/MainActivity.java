@@ -28,7 +28,6 @@ import com.ljremote.android.fragments.StaticFragment;
 import com.ljremote.android.json.JSonTestActivity;
 import com.ljremote.android.json.LJClientService;
 import com.ljremote.android.json.LJClientService.MODE;
-import com.ljremote.android.json.LJClientService.OnModeChangeListener;
 
 public class MainActivity extends FragmentActivity implements
 		MenuFragment.OnArticleSelectedListener, LJClientService.OnModeChangeListener {

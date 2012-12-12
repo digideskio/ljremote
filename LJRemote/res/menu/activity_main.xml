@@ -5,14 +5,31 @@
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/menu_settings"/>
-
-    <item 
+    <item
         android:id="@+id/menu_testjson"
         android:showAsAction="always"
         android:title="@string/menu_testjson"/>
-    <group android:id="@+id/menu_change_mode" android:checkableBehavior="single" android:enabled="true">
-        <item android:id="@+id/menu_mode_unbound" android:title="UNBOUND"></item>
-        <item android:id="@+id/menu_mode_bound" android:title="BOUND"></item>
-        <item android:id="@+id/menu_mode_drive" android:title="DRIVE"></item>
-    </group>
+    <item android:id="@+id/menu_change_mode" android:showAsAction="ifRoom" android:title="MODE">
+        <menu>
+            <group
+                android:id="@+id/menu_change_mode_groupe"
+                android:checkableBehavior="single"
+                android:enabled="true"
+                android:visible="true" >
+                <item
+                    android:id="@+id/menu_mode_unbound"
+                    android:title="UNBOUND">
+                </item>
+                <item
+                    android:id="@+id/menu_mode_bound"
+                    android:title="BOUND">
+                </item>
+                <item
+                    android:id="@+id/menu_mode_drive"
+                    android:title="DRIVE">
+                </item>
+            </group>
+        </menu>
+    </item>
+
 </menu>
