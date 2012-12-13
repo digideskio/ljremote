@@ -167,7 +167,7 @@ public class LJDriver {
 	}
 	
 	public void checkLJ() throws LJNotFoundException{
-		if(LJHandle != null){
+		if(LJHandle == null){
 			throw new LJNotFoundException();
 		}
 	}
