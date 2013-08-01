@@ -9,5 +9,8 @@
     <string name="server_mode_unbound">No server</string>
     <string name="server_mode_bound">Bound to server</string>
     <string name="server_mode_driver">Driving LJ</string>
+    <string name="connect">Connect</string>
+    <string name="drive">Drive</string>
+
 
 </resources>

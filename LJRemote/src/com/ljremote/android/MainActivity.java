@@ -19,6 +19,7 @@ import android.view.View;
 import com.ljremote.android.data.DataManager;
 import com.ljremote.android.fragments.AbstractDetailFragment;
 import com.ljremote.android.fragments.BGCueFragment;
+import com.ljremote.android.fragments.ConnectivityDialogFragment;
 import com.ljremote.android.fragments.CueFragment;
 import com.ljremote.android.fragments.CueListFragment;
 import com.ljremote.android.fragments.MasterIntFragment;
@@ -30,7 +31,8 @@ import com.ljremote.android.json.LJClientService;
 import com.ljremote.android.json.LJClientService.MODE;
 
 public class MainActivity extends FragmentActivity implements
-		MenuFragment.OnArticleSelectedListener, LJClientService.OnModeChangeListener {
+		MenuFragment.OnArticleSelectedListener,
+		LJClientService.OnModeChangeListener {
 
 	private final static String TAG = "Main";
 	private DataManager dm;
@@ -41,6 +43,8 @@ public class MainActivity extends FragmentActivity implements
 	private final static String STATE_LAST_LOAD_FRAGMENT_POS = "last_load_fragment_position";
 	private int lastLoadFragmentPosition;
 	private LJClientService ljService;
+	private ConnectivityDialogFragment connectivityDialog;
+	private Bundle conf;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +52,7 @@ public class MainActivity extends FragmentActivity implements
 		setContentView(R.layout.activity_main);
 
 		dm = new DataManager(this);
-		
+
 		detailsFragments = new ArrayList<AbstractDetailFragment>();
 		registerFragment(new StaticFragment());
 		registerFragment(new SequenceFragment());
@@ -62,33 +66,49 @@ public class MainActivity extends FragmentActivity implements
 		lastLoadFragmentPosition = savedInstanceState == null ? -1
 				: savedInstanceState.getInt(STATE_LAST_LOAD_FRAGMENT_POS, -1);
 
+		connectivityDialog = new ConnectivityDialogFragment();
 		// Set up the action bar to show a dropdown list.
 		final ActionBar actionBar = getActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
+
+		conf = new Bundle();
+		conf.putSerializable(ConnectivityDialogFragment.SERVICE_MODE,
+				MODE.UNBOUND);
+		conf.putString(ConnectivityDialogFragment.SOCKET_ADDRESS,
+				"0.0.0.0:2508");
+		conf.putString(ConnectivityDialogFragment.LJ_VERSION, "0.0.0");
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		Intent intent = null;
 		switch (item.getItemId()) {
 		case android.R.id.home:
-//			if (!deviceIsLargeScreen() && lastLoadFragmentPosition > 0) {
-				// app icon in action bar clicked; go home
-				Intent intent = new Intent(this, MainActivity.class);
-				startActivity(intent);
-//			}
+			// if (!deviceIsLargeScreen() && lastLoadFragmentPosition > 0) {
+			// app icon in action bar clicked; go home
+			intent = new Intent(this, MainActivity.class);
+			startActivity(intent);
+			// }
 			return true;
 		case R.id.menu_testjson:
 			startActivity(new Intent(this, JSonTestActivity.class));
 			break;
-		case R.id.menu_mode_bound:
-			onModeChange(MODE.BOUND);
-			break;
-		case R.id.menu_mode_unbound:
-			onModeChange(MODE.UNBOUND);
-			break;
-		case R.id.menu_mode_drive:
-			onModeChange(MODE.DRIVE);
-			break;
+		case R.id.menu_change_mode:
+			// connectivityDialog.loadBundle(conf);
+			// connectivityDialog.show(getSupportFragmentManager(), TAG);
+			// case R.id.menu_mode_bound:
+			// onModeChange(MODE.BOUND);
+			// break;
+			// case R.id.menu_mode_unbound:
+			// onModeChange(MODE.UNBOUND);
+			// break;
+			// case R.id.menu_mode_drive:
+			// onModeChange(MODE.DRIVE);
+			// break;
+		case R.id.menu_settings:
+			intent = new Intent(this, SettingsActivity.class);
+			startActivity(intent);
+			return true;
 		default:
 		}
 		return super.onOptionsItemSelected(item);

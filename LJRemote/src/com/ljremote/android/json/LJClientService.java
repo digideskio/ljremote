@@ -17,12 +17,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import android.R;
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -59,6 +62,7 @@ public class LJClientService extends Service {
 			doKeepAlive();
 		}
 	};
+	private SharedPreferences prefs;
 
 	public interface OnModeChangeListener {
 		public void onModeChange(MODE newMode);
@@ -89,7 +93,9 @@ public class LJClientService extends Service {
 		Log.d(TAG, "KeepAliveSender created");
 //		taskExecutor= Executors.newSingleThreadExecutor();
 //		Log.d(TAG, "Task executor created");
+		prefs= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		indicator=0;
+//		setHost(prefs.getString("", defValue), port)
 	}
 
 	@Override
@@ -147,6 +153,7 @@ public class LJClientService extends Service {
 			case DRIVE:
 				if (socket != null && socket.isConnected() && !socket.isClosed()) {
 					try {
+						Log.d(TAG, "Id : " + config.getId() );
 						serverService.closeSession(config.getId());
 					} catch (Exception e) {
 						Log.e(TAG, "Error append while disconnecting", e);
@@ -164,7 +171,7 @@ public class LJClientService extends Service {
 			switch (state.get()) {
 			case BOUND:
 			case DRIVE:
-				changeMode(MODE.UNBOUND);
+				closeInternal();
 			default:
 				break;
 			}
@@ -246,6 +253,7 @@ public class LJClientService extends Service {
 	}
 
 	private void closeInternal() {
+		stopKeepAlive();
 		try {
 			socket.close();
 		} catch (IOException e) {
@@ -257,11 +265,12 @@ public class LJClientService extends Service {
 	}
 
 	private void startKeepAlive(long realTime) {
-		if (config.getTimeOut() > MIN_TIMEOUT) {
+		if (!keepAliveStarted && config.getTimeOut() > MIN_TIMEOUT) {
 			keepAliveTimeout = (int) (config.getTimeOut() * keepAliveFactor);
 			long firstTime= realTime
 					+ keepAliveTimeout/2;
 			Log.v(TAG, "before");
+			keepAliveExecutor = Executors.newSingleThreadScheduledExecutor();
 			keepAliveExecutor.scheduleAtFixedRate(alarm, keepAliveTimeout-MIN_TIMEOUT, keepAliveTimeout, TimeUnit.MILLISECONDS);
 			keepAliveStarted = true;
 			Log.i(TAG,
@@ -275,6 +284,12 @@ public class LJClientService extends Service {
 	private void stopKeepAlive() {
 		if (keepAliveStarted) {
 			keepAliveExecutor.shutdownNow();
+			try {
+				keepAliveExecutor.awaitTermination(keepAliveTimeout, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				Log.e(TAG, "Error append while stopping keepAlive", e);
+			}
+			keepAliveStarted = false;
 			Log.i(TAG, "Stoped Keep Alive Service");
 			Toast.makeText(getApplicationContext(), "Keep Alive Service stopped", Toast.LENGTH_SHORT).show();
 		}
@@ -286,12 +301,9 @@ public class LJClientService extends Service {
 		switch (state.get()) {
 		case BOUND:
 		case DRIVE:
-			if (!keepAliveStarted) {
-				startKeepAlive(SystemClock.elapsedRealtime());
-			}
+			startKeepAlive(SystemClock.elapsedRealtime());
 			break;
 		default:
-			stopKeepAlive();
 			break;
 		}
 		fireOnModeChange();

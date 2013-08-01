@@ -9,25 +9,23 @@ public class ServerServicesImpl implements ServerService{
 	}
 
 
-	@Override
-	public void hello() {
+	public String hello() {
+		return "hello";
 	}
 
 
-	@Override
-	public void iWantMyException(Exception e) throws Exception {
+	public Void iWantMyException(Exception e) throws Exception {
 		throw e;
 	}
 
 
-	@Override
 	public SessionConfig connect() {
 		return new SessionConfig(0, 0);
 	}
 
 
-	@Override
-	public void closeSession(int id) {
+	public Boolean closeSession(int id) {
+		return true;
 	}
 
 }

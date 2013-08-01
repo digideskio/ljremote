@@ -7,7 +7,7 @@
   	<dependency>
   		<groupId>com.ljremote</groupId>
   		<artifactId>json-rpc</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
+  		<version>0.0.2-SNAPSHOT</version>
   	</dependency>
   	<dependency>
   		<groupId>commons-logging</groupId>

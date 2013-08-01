@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.googlecode.jsonrpc4j.JsonRpcClient;
 import com.googlecode.jsonrpc4j.ReflectionUtil;
+import com.ljremote.client.ui.MainWindow;
 
 public class Main {
 
@@ -93,32 +94,33 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 
-		Box box = Box.createVerticalBox();
-		JButton button;
-		try {
-			final LJClient client= new LJClient(new Socket("192.168.0.10",2508));
-			button = new JButton("Hello World");
-			button.addMouseListener(new MouseAdapter() {
-				
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					super.mouseClicked(e);
-					new Thread(client).start();
-				}
-				
-			});
-			box.add(button);
-			
-			JFrame frame = new JFrame();
-			frame.setContentPane(box);
-			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			frame.pack();
-			frame.setVisible(true);
-		} catch (UnknownHostException e1) {
-			log.error(e1);
-		} catch (IOException e1) {
-			log.error(e1);
-		}
+		MainWindow.main(args);
+//		Box box = Box.createVerticalBox();
+//		JButton button;
+////		try {
+////			final LJClient client= new LJClient(new Socket("192.168.0.10",2508));
+//			button = new JButton("Hello World");
+////			button.addMouseListener(new MouseAdapter() {
+////				
+////				@Override
+////				public void mouseClicked(MouseEvent e) {
+////					super.mouseClicked(e);
+////					new Thread(client).start();
+////				}
+////				
+////			});
+//			box.add(button);
+//			
+//			JFrame frame = new JFrame();
+//			frame.setContentPane(box);
+//			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//			frame.pack();
+//			frame.setVisible(true);
+////		} catch (UnknownHostException e1) {
+////			log.error(e1);
+////		} catch (IOException e1) {
+////			log.error(e1);
+////		}
 
 	}
 

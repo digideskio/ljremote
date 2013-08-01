@@ -16,12 +16,12 @@ public interface ServerService {
 	 * Send hello to keep the session alive
 	 * @return true if session still alive
 	 */
-	void hello();
+	String hello();
 	
 	/**
 	 * Close session
 	 */
-	void closeSession(int id);
+	Boolean closeSession(int id);
 	
-	void iWantMyException(Exception e) throws Exception;
+	Void iWantMyException(Exception e) throws Exception;
 }

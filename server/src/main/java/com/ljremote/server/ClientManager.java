@@ -54,29 +54,30 @@ public class ClientManager implements ServerService {
 
 	}
 
-	@Override
 	public String helloWord() {
+		log.trace("Hello world !");
 		return "Hello world !";
 	}
 
-	@Override
-	public void hello() {
+	public String hello() {
 		log.trace("Hello");
+		return "hello";
 	}
 
-	@Override
-	public void iWantMyException(Exception e) throws Exception {
+	public Void iWantMyException(Exception e) throws Exception {
 		throw e;
 	}
 
-	@Override
 	public SessionConfig connect() {
+		log.trace("Client connected");
 		return new SessionConfig(lastId, clientConfigs.get(lastId).timeOut);
 	}
 
-	@Override
-	public void closeSession(int id) {
+	public Boolean closeSession(int id) {
+		log.debug("Client " + id + " asked for closing session");
 		clientConfigs.get(id).closeTrigged.set(true);
+		log.trace("Session closed : " + clientConfigs.get(id).closeTrigged.get());
+		return clientConfigs.get(id).closeTrigged.get();
 	}
 
 	public synchronized ClientConfig getConfig(final SocketAddress socketAddr,
@@ -86,8 +87,8 @@ public class ClientManager implements ServerService {
 
 	private ClientConfig addClient(int id, long defaultTimeOut) {
 		lastId= id;
-		lastAdded = clientConfigs.put(id, new ClientConfig(id, defaultTimeOut));
-		return lastAdded;
+		clientConfigs.put(id, new ClientConfig(id, defaultTimeOut));
+		return clientConfigs.get(id);
 	}
 
 	public int geneId(final SocketAddress socketAddr) {

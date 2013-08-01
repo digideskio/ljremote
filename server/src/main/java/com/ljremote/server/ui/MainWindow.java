@@ -296,7 +296,6 @@ public class MainWindow implements OnServerStatusChangeListener, ClientConnectio
 		toggleButtons(false);
 	}
 
-	@Override
 	public void onServerStatusChange(STATUS status) {
 		switch (status) {
 		case RUNNING:
@@ -312,7 +311,6 @@ public class MainWindow implements OnServerStatusChangeListener, ClientConnectio
 		}
 	}
 
-	@Override
 	public void onClientConnectionEvent(ConnectionEvent event) {
 		switch (event.getType()) {
 		case CONNECT:

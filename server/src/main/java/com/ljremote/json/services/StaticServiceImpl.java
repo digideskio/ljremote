@@ -19,12 +19,10 @@ public class StaticServiceImpl extends AbstractLJService implements
 		super(driver);
 	}
 
-	@Override
 	public boolean toggleStatic(int id) {
 		return false;
 	}
 
-	@Override
 	public boolean enableStatic(int id, boolean enable) {
 		try {
 			driver.statics().enableStatic(id, enable);
@@ -34,7 +32,6 @@ public class StaticServiceImpl extends AbstractLJService implements
 		return true;
 	}
 
-	@Override
 	public boolean enableStatic(Map<Integer, Boolean> enableMap) {
 		boolean allgood= true;
 		for(Integer id: enableMap.keySet()){
@@ -48,31 +45,26 @@ public class StaticServiceImpl extends AbstractLJService implements
 		return allgood;
 	}
 
-	@Override
 	public boolean setStaticIntensity(int id, int level) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	@Override
 	public boolean setStaticIntensity(Map<Integer, Integer> intensityMap) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	@Override
 	public boolean updateStatic(Static s) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	@Override
 	public boolean updateStatics(List<Static> statics) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	@Override
 	public List<Static> getstatics() {
 		// TODO Auto-generated method stub
 		return null;

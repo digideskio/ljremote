@@ -360,7 +360,6 @@ public class LJServer {
 					.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
 		}
 
-		@Override
 		public void run() {
 			ServerSocket serverSocket = LJServer.this.serverSocket;
 
@@ -400,6 +399,7 @@ public class LJServer {
 		private ExecutorService timerExecutor;
 		private ConnectionEvent event;
 		private ClientConfig conf;
+		private long clientTimeOut;
 
 		public ClientHandle(Socket socket) {
 			// log the connection
@@ -411,7 +411,9 @@ public class LJServer {
 					.getInetAddress().toString(), socket.getPort(),
 					(int) getDefaultClientTimeout());
 			conf= clientManager == null ? null : clientManager.getConfig(socket.getRemoteSocketAddress(), getDefaultClientTimeout());
-			log.info("chaud cacao");
+			clientTimeOut = conf == null ? DEFAULT_CLIENT_TIMEOUT : conf.getTimeOut();
+			log.info("Id given to : " + socket.getInetAddress() + ":"
+					+ socket.getPort() + " => " + conf == null ? 0 : conf.getId());
 			try {
 				inputChecker = new InputStreamChecker(socket.getInputStream());
 			} catch (IOException e) {
@@ -419,18 +421,19 @@ public class LJServer {
 			}
 		}
 
-		@Override
 		public void run() {
 			try {
 				fireOnClientConnectionEvent(event);
 				// keep handling requests
 				int errors = 0;
+				log.trace("Heuuuuuu");
 				while ((conf == null || !conf.closeTrigged.get()) && LJServer.this.keepRunning.get() && socket.isConnected()) {
+					log.trace("Dans while :" + conf);
 					Future<Integer> f = timerExecutor.submit(inputChecker);
-					if (f.get(DEFAULT_CLIENT_TIMEOUT,
+					if (f.get(clientTimeOut,
 							DEFAULT_CLIENT_TIMEOUT_UNIT) > 0) {
 						try {
-							log.info("coucou");
+							log.trace("Processing RPC");
 							jsonRpcServer.handle(socket.getInputStream(),
 									socket.getOutputStream());
 						} catch (Throwable t) {
@@ -445,8 +448,8 @@ public class LJServer {
 							}
 						}
 					}
-					;
 				}
+				log.trace("End while");
 			} catch (InterruptedException e) {
 				log.error(e);
 			} catch (ExecutionException e) {
@@ -475,14 +478,14 @@ public class LJServer {
 			this.in = in;
 		}
 
-		@Override
 		public Integer call() throws Exception {
-			log.trace(String.format("Checking input %s", in.hashCode()));
+			log.trace(String.format("Checking input stream %s", in.hashCode()));
 			int res;
 			while ((res = in.available()) <= 0) {
-				if (in.available() > 0) {
-				}
+//				if (in.available() > 0) {
+//				}
 			}
+			log.trace("In buffer : " + res);
 			return res;
 		}
 	}

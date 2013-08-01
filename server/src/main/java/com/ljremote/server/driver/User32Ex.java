@@ -1,5 +1,6 @@
 package com.ljremote.server.driver;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.sun.jna.Native;
@@ -35,7 +36,7 @@ public interface User32Ex extends com.sun.jna.platform.win32.User32 {
 			int style, int x, int y, int width, int height, HWND hndParent,
 			int hndMenu, int hndInst, Object parm);
 
-	int DestroyWindow(HWND hwnd);
+	boolean DestroyWindow(HWND hwnd);
 
 	int MsgWaitForMultipleObjects(int nCount, HANDLE[] pHandles,
 			boolean bWaitAll, int dwMilliseconds, int dwWakeMask);
@@ -46,39 +47,47 @@ public interface User32Ex extends com.sun.jna.platform.win32.User32 {
 	final int PM_NOREMOVE = 0x0000;
 	final int PM_REMOVE = 0x0001;
 	final int PM_NOYIELD = 0x0002;
-	
-	int DefWindowProc(HWND hWnd, int msg, WPARAM wParam, LPARAM lParam);
+
+	LRESULT DefWindowProc(HWND hWnd, int msg, WPARAM wParam, LPARAM lParam);
 
 	/*
 	 * CopyDat
 	 */
 	final int WM_COPYDATA = 0x004a;
+
 	class COPYDATASTRUCT extends Structure {
-		static class ByReference extends COPYDATASTRUCT implements Structure.ByReference {}
+		static class ByReference extends COPYDATASTRUCT implements
+				Structure.ByReference {
+		}
+
 		ULONG_PTR dwData;
 		DWORD cbData;
 		WString lpData;
-		
+
 		@Override
 		protected List<?> getFieldOrder() {
-			// TODO Auto-generated method stub
-			return null;
+			return Arrays.asList(new String[] { "dwData", "cbData", "lpData" });
 		}
 	}
-	
-	
-	LRESULT SendMessageA(HWND hwnd,int umsg,int wParam,int lParam);
-	void PostMessageA(HWND hwnd,int umsg,int wParam,int lParam);
+
+	LRESULT SendMessageA(HWND hwnd, int umsg, int wParam, int lParam);
+
+	void PostMessageA(HWND hwnd, int umsg, int wParam, int lParam);
+
 	HWND FindWindowW(String lcClassname, String lpName);
+
 	HWND FindWindowA(String lcClassname, String lpName);
-	
+
 	/* Light Jockey Specifics */
-	class LJGenericItem extends Structure{
-		static class ByReference extends LJGenericItem implements Structure.ByReference{};
+	class LJGenericItem extends Structure {
+		static class ByReference extends LJGenericItem implements
+				Structure.ByReference {
+		};
+
 		int number;
 		int flags;
 		WString name;
-		
+
 		@Override
 		protected List<?> getFieldOrder() {
 			// TODO Auto-generated method stub

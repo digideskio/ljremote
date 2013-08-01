@@ -4,6 +4,7 @@ import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.LPARAM;
+import com.sun.jna.platform.win32.WinDef.LRESULT;
 import com.sun.jna.platform.win32.WinDef.WPARAM;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
 import com.sun.jna.platform.win32.WinUser.MSG;
@@ -49,9 +50,9 @@ public class Win32CopyDataMonitor implements StdCallCallback, Runnable {
 		return viewer;
 	}
 	
-	public int callback(HWND hWnd, int uMsg, WPARAM wParam, LPARAM lParam){
+	public LRESULT callback(HWND hWnd, int uMsg, WPARAM wParam, LPARAM lParam){
 		if(uMsg == User32Ex.WM_COPYDATA){
-//			System.out.println(((COPYDATASTRUCT.ByReference) lParam).cbData);
+			System.out.println(lParam);
 		}
 		return User32Ex.INSTANCE.DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}

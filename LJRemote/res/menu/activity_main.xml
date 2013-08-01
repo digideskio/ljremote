@@ -9,8 +9,8 @@
         android:id="@+id/menu_testjson"
         android:showAsAction="always"
         android:title="@string/menu_testjson"/>
-    <item android:id="@+id/menu_change_mode" android:showAsAction="ifRoom" android:title="MODE">
-        <menu>
+    <item android:id="@+id/menu_change_mode" android:showAsAction="always" android:title="Status" android:icon="@drawable/ic_menu_cycle_red">
+        <!-- <menu>
             <group
                 android:id="@+id/menu_change_mode_groupe"
                 android:checkableBehavior="single"
@@ -29,7 +29,8 @@
                     android:title="DRIVE">
                 </item>
             </group>
-        </menu>
+            <item android:id="@+id/item1" android:visible="true" android:menuCategory="container" android:showAsAction="always" android:actionViewClass="android.widget.SearchView"/>
+        </menu> -->
     </item>
 
 </menu>

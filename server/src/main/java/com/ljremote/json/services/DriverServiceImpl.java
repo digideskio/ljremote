@@ -18,7 +18,6 @@ public class DriverServiceImpl extends AbstractLJService implements
 		return driver == null ? "" : driver.getLJVersion();
 	}
 
-	@Override
 	public void findLJ() throws LJNotFoundException {
 		if (!driver.findLJ()) {
 			throw new LJNotFoundException();

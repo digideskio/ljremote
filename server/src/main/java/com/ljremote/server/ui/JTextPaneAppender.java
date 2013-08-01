@@ -80,7 +80,6 @@ public class JTextPaneAppender extends AppenderSkeleton {
 		}
 		SwingUtilities.invokeLater(new Runnable() {
 
-			@Override
 			public void run() {
 				try {
 					doc.insertString(doc.getLength(), message, style);
@@ -91,12 +90,10 @@ public class JTextPaneAppender extends AppenderSkeleton {
 		});
 	}
 
-	@Override
 	public void close() {
 		super.closed = true;
 	}
 
-	@Override
 	public boolean requiresLayout() {
 		return true;
 	}
