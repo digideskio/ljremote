@@ -73,7 +73,7 @@ public class LJClientService extends Service {
 	}
 
 	public class LocalBinder extends Binder {
-		LJClientService getService() {
+		public LJClientService getService() {
 			return LJClientService.this;
 		}
 	}

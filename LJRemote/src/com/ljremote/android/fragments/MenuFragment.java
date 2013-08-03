@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -116,6 +117,7 @@ private TextView server_mode_text;
 			break;
 		}
 		server_mode_icon.setImageResource(icon_id);
+//		((MenuItem) mainView.findViewById(R.id.menu_change_mode)).setIcon(icon_id);
 		server_mode_text.setText(text_id);
 	}
 

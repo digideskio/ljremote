@@ -1,15 +1,19 @@
 package com.ljremote.android;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
@@ -20,19 +24,25 @@ import com.ljremote.android.data.DataManager;
 import com.ljremote.android.fragments.AbstractDetailFragment;
 import com.ljremote.android.fragments.BGCueFragment;
 import com.ljremote.android.fragments.ConnectivityDialogFragment;
+import com.ljremote.android.fragments.ConnectivityDialogFragment.COMMAND;
+import com.ljremote.android.fragments.ConnectivityDialogFragment.OnCommandListener;
 import com.ljremote.android.fragments.CueFragment;
 import com.ljremote.android.fragments.CueListFragment;
 import com.ljremote.android.fragments.MasterIntFragment;
 import com.ljremote.android.fragments.MenuFragment;
 import com.ljremote.android.fragments.SequenceFragment;
 import com.ljremote.android.fragments.StaticFragment;
+import com.ljremote.android.json.JSonRpcTask;
 import com.ljremote.android.json.JSonTestActivity;
 import com.ljremote.android.json.LJClientService;
+import com.ljremote.android.json.LJClientService.LocalBinder;
 import com.ljremote.android.json.LJClientService.MODE;
+import com.ljremote.json.services.DriverService;
 
 public class MainActivity extends FragmentActivity implements
 		MenuFragment.OnArticleSelectedListener,
-		LJClientService.OnModeChangeListener {
+		LJClientService.OnModeChangeListener,
+		OnCommandListener{
 
 	private final static String TAG = "Main";
 	private DataManager dm;
@@ -45,13 +55,37 @@ public class MainActivity extends FragmentActivity implements
 	private LJClientService ljService;
 	private ConnectivityDialogFragment connectivityDialog;
 	private Bundle conf;
+	private boolean serviceBound;
+	private ServiceConnection serviceConnection = new ServiceConnection() {
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			serviceBound = false;
+		}
+
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			ljService = ((LocalBinder) service).getService();
+			ljService.registerOnModeChangeListener(MainActivity.this);
+			serviceBound = true;
+			try {
+				ljService.setHost("192.168.0.10", 2508);
+				conf.putString(ConnectivityDialogFragment.SOCKET_ADDRESS,
+						"192.168.0.10:2508");
+//				ljService.connect();
+			} catch (UnknownHostException e) {
+				// jsonDisplay.append("\n" + e);
+			}
+		}
+	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		initConf();
 
-		dm = new DataManager(this);
+//		dm = new DataManager(this);
 
 		detailsFragments = new ArrayList<AbstractDetailFragment>();
 		registerFragment(new StaticFragment());
@@ -71,6 +105,13 @@ public class MainActivity extends FragmentActivity implements
 		final ActionBar actionBar = getActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
 
+
+		// Service
+		Intent intent = new Intent(this, LJClientService.class);
+		bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+	}
+
+	private void initConf(){
 		conf = new Bundle();
 		conf.putSerializable(ConnectivityDialogFragment.SERVICE_MODE,
 				MODE.UNBOUND);
@@ -78,7 +119,7 @@ public class MainActivity extends FragmentActivity implements
 				"0.0.0.0:2508");
 		conf.putString(ConnectivityDialogFragment.LJ_VERSION, "0.0.0");
 	}
-
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Intent intent = null;
@@ -94,17 +135,18 @@ public class MainActivity extends FragmentActivity implements
 			startActivity(new Intent(this, JSonTestActivity.class));
 			break;
 		case R.id.menu_change_mode:
-			// connectivityDialog.loadBundle(conf);
-			// connectivityDialog.show(getSupportFragmentManager(), TAG);
-			// case R.id.menu_mode_bound:
-			// onModeChange(MODE.BOUND);
-			// break;
-			// case R.id.menu_mode_unbound:
-			// onModeChange(MODE.UNBOUND);
-			// break;
-			// case R.id.menu_mode_drive:
-			// onModeChange(MODE.DRIVE);
-			// break;
+			connectivityDialog.setArguments(conf);
+			connectivityDialog.show(getSupportFragmentManager(), TAG);
+			break;
+		// case R.id.menu_mode_bound:
+		// onModeChange(MODE.BOUND);
+		// break;
+		// case R.id.menu_mode_unbound:
+		// onModeChange(MODE.UNBOUND);
+		// break;
+		// case R.id.menu_mode_drive:
+		// onModeChange(MODE.DRIVE);
+		// break;
 		case R.id.menu_settings:
 			intent = new Intent(this, SettingsActivity.class);
 			startActivity(intent);
@@ -217,6 +259,49 @@ public class MainActivity extends FragmentActivity implements
 
 	@Override
 	public void onModeChange(MODE newMode) {
+		conf.putSerializable(ConnectivityDialogFragment.SERVICE_MODE, newMode);
 		menuFragment.changeServerMode(newMode);
+		if ( connectivityDialog.isVisible() ) {
+			connectivityDialog.updateUI(conf);
+		}
+	}
+
+	@Override
+	public void onCommand(COMMAND cmd, String[] args) {
+		if ( ljService == null || !serviceBound ) {
+			return;
+		}
+		switch (cmd) {
+		case DRIVE:
+			ljService.drive();
+			JSonRpcTask<Void, Void, String> task = new JSonRpcTask<Void, Void, String>() {
+
+				@Override
+				protected String doInBackground(Void... params) {
+					return ljService.getClientProxy(DriverService.class).getLJversion();
+				}
+
+				@Override
+				protected void onPostExecute(String result) {
+					if ( result != null ) {
+						conf.putString(ConnectivityDialogFragment.LJ_VERSION, result);
+						connectivityDialog.updateUI(conf);
+					}
+				}
+			};
+			task.execute();
+			break;
+		case UNDRIVE:
+			ljService.stopDrive();
+			break;
+		case CONNECT:
+			ljService.connect();
+			break;
+		case DISCONNECT:
+			ljService.disconnect();
+			break;
+		default:
+			break;
+		}
 	}
 }

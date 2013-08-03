@@ -412,10 +412,10 @@ public class LJServer {
 					(int) getDefaultClientTimeout());
 			conf= clientManager == null ? null : clientManager.getConfig(socket.getRemoteSocketAddress(), getDefaultClientTimeout());
 			clientTimeOut = conf == null ? DEFAULT_CLIENT_TIMEOUT : conf.getTimeOut();
-			log.info("Id given to : " + socket.getInetAddress() + ":"
-					+ socket.getPort() + " => " + conf == null ? 0 : conf.getId());
+			log.info(String.format("Id given to : %s:%d => %d",
+					socket.getInetAddress().getHostAddress(), socket.getPort(), conf == null ? 0 : conf.getId()));
 			try {
-				inputChecker = new InputStreamChecker(socket.getInputStream());
+				inputChecker = new InputStreamChecker(socket.getInputStream(), clientTimeOut / 50);
 			} catch (IOException e) {
 				log.error("Client socket failed", e);
 			}
@@ -472,18 +472,19 @@ public class LJServer {
 
 	private class InputStreamChecker implements Callable<Integer> {
 
-		InputStream in;
+		private InputStream in;
+		private long wait_time;
 
-		public InputStreamChecker(InputStream in) {
+		public InputStreamChecker(InputStream in, long wait_time) {
 			this.in = in;
+			this.wait_time = wait_time;
 		}
 
 		public Integer call() throws Exception {
 			log.trace(String.format("Checking input stream %s", in.hashCode()));
 			int res;
 			while ((res = in.available()) <= 0) {
-//				if (in.available() > 0) {
-//				}
+				Thread.sleep(wait_time);
 			}
 			log.trace("In buffer : " + res);
 			return res;
