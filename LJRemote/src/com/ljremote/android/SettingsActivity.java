@@ -30,6 +30,8 @@ public class SettingsActivity extends PreferenceActivity {
 	 * shown on tablets.
 	 */
 	private static final boolean ALWAYS_SIMPLE_PREFS = false;
+	public static final String SERVER_HOST_ADDRESS = "server_host_address";
+	public static final String SERVER_HOST_PORT = "server_host_port";
 
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {

@@ -10,7 +10,7 @@ public abstract class JSonRpcTask<Params, Progress, Result> extends AsyncTask<Pa
 		this.ljService= service;
 	}
 	
-	public <T> T getClientProxy(Class<T> proxyInterface){
+	public <T> T getClientProxy(Class<T> proxyInterface) throws Exception{
 		return ljService == null ? null : ljService.getClientProxy(proxyInterface);
 	}
 	

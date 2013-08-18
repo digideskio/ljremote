@@ -1,46 +1,53 @@
 package com.ljremote.android.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
-import android.widget.RelativeLayout.LayoutParams;
-import android.widget.SimpleAdapter;
 
+import com.ljremote.android.MainActivity;
 import com.ljremote.android.R;
-import com.ljremote.android.util.ArrayHelper;
+import com.ljremote.android.adapters.SeqCursorAdapter;
+import com.ljremote.android.data.SequenceManager;
 
-public class SequenceFragment extends AbstractDetailFragment {
+public class SequenceFragment extends AbstractDetailFragment implements OnClickListener {
 
 	public SequenceFragment() {
 		super(R.string.sequences);
 	}
 	
-	private final static String[][] sequences= {
-		{"1","Sequences"},
-		{"2","Sequences"},
-		{"3","Sequences"},
-		{"4","Sequences"},
-		{"5","Sequences"},
-		{"6","Sequences"},
-		{"7","Sequences"},
-		{"8","Sequences"},
-		{"9","Sequences"},
-		{"10","Sequences"},
-		{"11","Sequences"},
-	};
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View mainView = inflater.inflate(R.layout.sequence_fragment, null, true);
+		MainActivity main = (MainActivity) getActivity();
+		setDataManager(main.getDataManager().getSequenceManager());
 		
-		ListView listView = new ListView(getActivity());
-		listView.setAdapter(new SimpleAdapter(getActivity(), ArrayHelper.convertToListMap(sequences), R.layout.seq_item, new String[]{"text1","text2"}, new int[]{R.id.id,R.id.label}));
-		((ViewGroup) mainView).addView(listView, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		ListView listView = (ListView) mainView.findViewById(R.id.seq_list);
+		SeqCursorAdapter adapter = new SeqCursorAdapter((SequenceManager) getDataManager());
+		listView.setAdapter(adapter);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-		listView.setSelector(R.drawable.static_list_selector);
+		
+		((Button) mainView.findViewById(R.id.up_all)).setOnClickListener(this);
+		((Button) mainView.findViewById(R.id.clear_all)).setOnClickListener(this);
 		return mainView;
+	}
+
+	@Override
+	public void onClick(View v) {
+		Log.d("seq.update_all", "onClick : " + v.getId() + " ( " + R.id.up_all + " ) ");
+		switch (v.getId()) {
+		case R.id.up_all:
+			((SequenceManager) getDataManager()).updateAllDB();
+			break;
+		case R.id.clear_all:
+			((SequenceManager) getDataManager()).clearAll();
+		default:
+			break;
+		}
 	}
 }

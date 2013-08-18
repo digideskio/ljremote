@@ -28,57 +28,63 @@ public final class R {
         public static final int yellow=0x7f020008;
     }
     public static final class id {
-        public static final int LinearLayout01=0x7f0a000d;
+        public static final int LinearLayout01=0x7f0a0010;
         public static final int RelativeLayout1=0x7f0a0000;
-        public static final int Space1=0x7f0a001f;
-        public static final int address=0x7f0a0014;
-        public static final int connect_button=0x7f0a0012;
+        public static final int Space1=0x7f0a0024;
+        public static final int address=0x7f0a0019;
+        public static final int bgcue_list=0x7f0a0004;
+        public static final int clear_all=0x7f0a0005;
+        public static final int connect_button=0x7f0a0017;
+        public static final int cue_list=0x7f0a0015;
+        public static final int cuelist_list=0x7f0a0016;
         public static final int detail_container=0x7f0a0002;
-        public static final int driverLayout=0x7f0a000b;
-        public static final int driver_drive_button=0x7f0a000e;
-        public static final int driver_setting_button=0x7f0a000f;
-        public static final int driver_status_icon=0x7f0a000c;
-        public static final int driver_status_large=0x7f0a0010;
-        public static final int driver_status_version=0x7f0a0011;
-        public static final int frameLayout1=0x7f0a002f;
-        public static final int frggtgthth=0x7f0a0016;
-        public static final int id=0x7f0a0027;
-        public static final int imageView1=0x7f0a002e;
-        public static final int intensity=0x7f0a002b;
-        public static final int jsonConnect=0x7f0a0017;
-        public static final int jsonDisconnect=0x7f0a0018;
-        public static final int jsonDisplay=0x7f0a001e;
-        public static final int jsonDrive=0x7f0a0020;
-        public static final int jsonException=0x7f0a001d;
-        public static final int jsonHelloWorld=0x7f0a001b;
-        public static final int jsonLJReady=0x7f0a001a;
-        public static final int jsonLJVersion=0x7f0a001c;
-        public static final int jsonUnDrive=0x7f0a0021;
-        public static final int label=0x7f0a0028;
-        public static final int linearLayout1=0x7f0a0007;
-        public static final int menu=0x7f0a0024;
-        public static final int menu_change_mode=0x7f0a0032;
+        public static final int driverLayout=0x7f0a000e;
+        public static final int driver_drive_button=0x7f0a0011;
+        public static final int driver_setting_button=0x7f0a0012;
+        public static final int driver_status_icon=0x7f0a000f;
+        public static final int driver_status_large=0x7f0a0013;
+        public static final int driver_status_version=0x7f0a0014;
+        public static final int frameLayout1=0x7f0a0035;
+        public static final int frggtgthth=0x7f0a001b;
+        public static final int id=0x7f0a002c;
+        public static final int imageView1=0x7f0a0034;
+        public static final int intensity=0x7f0a0031;
+        public static final int jsonConnect=0x7f0a001c;
+        public static final int jsonDisconnect=0x7f0a001d;
+        public static final int jsonDisplay=0x7f0a0023;
+        public static final int jsonDrive=0x7f0a0025;
+        public static final int jsonException=0x7f0a0022;
+        public static final int jsonHelloWorld=0x7f0a0020;
+        public static final int jsonLJReady=0x7f0a001f;
+        public static final int jsonLJVersion=0x7f0a0021;
+        public static final int jsonUnDrive=0x7f0a0026;
+        public static final int label=0x7f0a002d;
+        public static final int linearLayout1=0x7f0a000a;
+        public static final int menu=0x7f0a0029;
+        public static final int menu_change_mode=0x7f0a0038;
         public static final int menu_container=0x7f0a0001;
-        public static final int menu_settings=0x7f0a0030;
-        public static final int menu_testjson=0x7f0a0031;
-        public static final int mstr_int_list=0x7f0a0025;
-        public static final int seek_int=0x7f0a0026;
-        public static final int seek_intensity=0x7f0a002c;
-        public static final int serverLayout=0x7f0a0003;
-        public static final int server_connect_button=0x7f0a0008;
-        public static final int server_mode_icon=0x7f0a0022;
-        public static final int server_mode_text=0x7f0a0023;
-        public static final int server_setting_button=0x7f0a0009;
-        public static final int server_status_address=0x7f0a000a;
-        public static final int server_status_icon=0x7f0a0004;
-        public static final int server_status_large=0x7f0a0005;
-        public static final int setting_button=0x7f0a0013;
-        public static final int sliding_main=0x7f0a002d;
-        public static final int static_list=0x7f0a0029;
-        public static final int status_icon=0x7f0a0006;
-        public static final int status_large=0x7f0a0015;
-        public static final int toggle=0x7f0a002a;
-        public static final int view1=0x7f0a0019;
+        public static final int menu_settings=0x7f0a0036;
+        public static final int menu_testjson=0x7f0a0037;
+        public static final int mstr_int_list=0x7f0a002a;
+        public static final int seek_int=0x7f0a002b;
+        public static final int seek_intensity=0x7f0a0032;
+        public static final int seq_list=0x7f0a002e;
+        public static final int serverLayout=0x7f0a0006;
+        public static final int server_connect_button=0x7f0a000b;
+        public static final int server_mode_icon=0x7f0a0027;
+        public static final int server_mode_text=0x7f0a0028;
+        public static final int server_setting_button=0x7f0a000c;
+        public static final int server_status_address=0x7f0a000d;
+        public static final int server_status_icon=0x7f0a0007;
+        public static final int server_status_large=0x7f0a0008;
+        public static final int setting_button=0x7f0a0018;
+        public static final int sliding_main=0x7f0a0033;
+        public static final int static_list=0x7f0a002f;
+        public static final int status_icon=0x7f0a0009;
+        public static final int status_large=0x7f0a001a;
+        public static final int toggle=0x7f0a0030;
+        public static final int up_all=0x7f0a0003;
+        public static final int view1=0x7f0a001e;
     }
     public static final class integer {
         public static final int NUM_MAX_LENGTH=0x7f050000;
@@ -108,6 +114,7 @@ public final class R {
     public static final class string {
         public static final int app_name=0x7f060006;
         public static final int bgcues=0x7f060003;
+        public static final int clear_all=0x7f060013;
         public static final int connect=0x7f06000e;
         public static final int cuelists=0x7f060005;
         public static final int cues=0x7f060002;
@@ -117,38 +124,39 @@ public final class R {
         public static final int menu_settings=0x7f060008;
         public static final int menu_testjson=0x7f06000a;
         public static final int mstr_int=0x7f060004;
-        public static final int pref_auto_connect=0x7f060022;
-        public static final int pref_default_display_name=0x7f060017;
-        public static final int pref_description_social_recommendations=0x7f060015;
+        public static final int pref_auto_connect=0x7f060024;
+        public static final int pref_default_display_name=0x7f060019;
+        public static final int pref_description_social_recommendations=0x7f060017;
         /**  Example settings for Data & Sync 
          */
-        public static final int pref_header_data_sync=0x7f060019;
+        public static final int pref_header_data_sync=0x7f06001b;
         /**  Strings related to Settings 
  Example General settings 
          */
-        public static final int pref_header_general=0x7f060013;
+        public static final int pref_header_general=0x7f060015;
         /**  Example settings for Notifications 
          */
-        public static final int pref_header_server=0x7f06001c;
-        public static final int pref_ip_address=0x7f060021;
-        public static final int pref_ringtone_silent=0x7f06001f;
-        public static final int pref_title_add_friends_to_messages=0x7f060018;
-        public static final int pref_title_display_name=0x7f060016;
-        public static final int pref_title_new_message_notifications=0x7f06001d;
-        public static final int pref_title_port=0x7f060023;
-        public static final int pref_title_ringtone=0x7f06001e;
-        public static final int pref_title_social_recommendations=0x7f060014;
-        public static final int pref_title_sync_frequency=0x7f06001a;
-        public static final int pref_title_system_sync_settings=0x7f06001b;
-        public static final int pref_title_vibrate=0x7f060020;
+        public static final int pref_header_server=0x7f06001e;
+        public static final int pref_ip_address=0x7f060023;
+        public static final int pref_ringtone_silent=0x7f060021;
+        public static final int pref_title_add_friends_to_messages=0x7f06001a;
+        public static final int pref_title_display_name=0x7f060018;
+        public static final int pref_title_new_message_notifications=0x7f06001f;
+        public static final int pref_title_port=0x7f060025;
+        public static final int pref_title_ringtone=0x7f060020;
+        public static final int pref_title_social_recommendations=0x7f060016;
+        public static final int pref_title_sync_frequency=0x7f06001c;
+        public static final int pref_title_system_sync_settings=0x7f06001d;
+        public static final int pref_title_vibrate=0x7f060022;
         public static final int sequences=0x7f060000;
         public static final int server_mode_bound=0x7f06000c;
         public static final int server_mode_driver=0x7f06000d;
         public static final int server_mode_unbound=0x7f06000b;
         public static final int statics=0x7f060001;
-        public static final int title_activity_settings=0x7f060012;
+        public static final int title_activity_settings=0x7f060014;
         public static final int toggle=0x7f060009;
         public static final int undrive=0x7f060011;
+        public static final int up_all=0x7f060012;
     }
     public static final class style {
         /** 

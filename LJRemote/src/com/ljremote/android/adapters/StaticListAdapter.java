@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import com.ljremote.android.MainActivity;
 import com.ljremote.android.R;
-import com.ljremote.android.types.Static;
+import com.ljremote.json.model.Static;
 
 public class StaticListAdapter extends ArrayAdapter<Static> {
 	
@@ -57,7 +57,7 @@ public class StaticListAdapter extends ArrayAdapter<Static> {
 		if(s != null){
 			holder.id.setText(String.valueOf(s.getId()));
 			holder.label.setText(s.getLabel());
-			holder.label.setSelected(s.isEnabled());
+			holder.label.setSelected(s.isEnable());
 			holder.intensity.setText(String.valueOf(s.getIntensity()));
 			holder.seek_int.setProgress(s.getIntensity());
 			attachProgressUpdatedListener(holder.seek_int,position);
@@ -73,7 +73,7 @@ public class StaticListAdapter extends ArrayAdapter<Static> {
 				Static s= getItem(position);
 				int progress = seekBar.getProgress();
 				
-				if (((MainActivity) getContext()).getDataManager().updateStaticIntensity(s.getId(), progress)){
+				if (((MainActivity) getContext()).getDataManager().getStaticManager().updateIntensity(s.getId(), progress)){
 					s.setIntensity(progress);
 				}
 				

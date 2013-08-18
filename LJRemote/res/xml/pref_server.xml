@@ -3,9 +3,9 @@
 
     <SwitchPreference android:title="@string/pref_auto_connect" android:key="auto_connect"/>
 
-    <EditTextPreference android:title="@string/pref_ip_address" android:key="ip_address" android:defaultValue="192.168.0.10"/>
+    <EditTextPreference android:title="@string/pref_ip_address" android:key="server_host_address" android:defaultValue="192.168.0.10"/>
     <EditTextPreference
         android:defaultValue="2508"
-        android:title="@string/pref_title_port" />
+        android:title="@string/pref_title_port" android:key="server_host_port"/>
 
 </PreferenceScreen>

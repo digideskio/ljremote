@@ -13,6 +13,8 @@
     <string name="disconnect">Disconnect</string>
     <string name="drive">Drive</string>
     <string name="undrive">Stop Drive</string>
+    <string name="up_all">Up All</string>
+    <string name="clear_all">Clear All</string>
 
 
 </resources>

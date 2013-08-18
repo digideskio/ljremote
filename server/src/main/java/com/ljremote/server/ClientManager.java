@@ -14,7 +14,6 @@ import com.ljremote.json.services.ServerService;
 public class ClientManager implements ServerService {
 	private static final Log log = LogFactory.getLog(ClientManager.class);
 	private Map<Integer, ClientConfig> clientConfigs= new HashMap<Integer, ClientManager.ClientConfig>();;
-	private ClientConfig lastAdded= null;
 	private int lastId = -1;
 	
 	public class ClientConfig {

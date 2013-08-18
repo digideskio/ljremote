@@ -17,7 +17,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import android.R;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -62,6 +61,7 @@ public class LJClientService extends Service {
 			doKeepAlive();
 		}
 	};
+	@SuppressWarnings("unused")
 	private SharedPreferences prefs;
 
 	public interface OnModeChangeListener {
@@ -252,16 +252,20 @@ public class LJClientService extends Service {
 		}
 	}
 
-	private void closeInternal() {
-		stopKeepAlive();
+	private void closeInternal(boolean soft) {
 		try {
 			socket.close();
 		} catch (IOException e) {
-			Log.e(TAG, "An exception occured:", e);
+//			Log.e(TAG, "An exception occured:", e);
 		}
 		socket = new Socket();
 		changeMode(MODE.UNBOUND);
 		Toast.makeText(getApplicationContext(), "closeInternal()", Toast.LENGTH_SHORT).show();
+		stopKeepAlive(soft);
+	}
+	
+	private void closeInternal(){
+		closeInternal(false);
 	}
 
 	private void startKeepAlive(long realTime) {
@@ -281,20 +285,22 @@ public class LJClientService extends Service {
 		}
 	}
 
-	private void stopKeepAlive() {
+	private void stopKeepAlive(boolean soft) {
 		if (keepAliveStarted) {
 			keepAliveExecutor.shutdownNow();
-			try {
-				keepAliveExecutor.awaitTermination(keepAliveTimeout, TimeUnit.MILLISECONDS);
-			} catch (InterruptedException e) {
-				Log.e(TAG, "Error append while stopping keepAlive", e);
+			if( !soft ) {
+				try {
+					keepAliveExecutor.awaitTermination(keepAliveTimeout, TimeUnit.MILLISECONDS);
+				} catch (InterruptedException e) {
+					Log.e(TAG, "Error append while stopping keepAlive", e);
+				}
 			}
-			keepAliveStarted = false;
 			Log.i(TAG, "Stoped Keep Alive Service");
 			Toast.makeText(getApplicationContext(), "Keep Alive Service stopped", Toast.LENGTH_SHORT).show();
+			keepAliveStarted = false;
 		}
 	}
-
+	
 	private void changeMode(MODE newMode) {
 		MODE oldMode = state.getAndSet(newMode);
 		Log.i(TAG, "Mode changed from " + oldMode + " to " + state);
@@ -327,8 +333,7 @@ public class LJClientService extends Service {
 				serverService.hello();
 				Log.v(TAG, "HELLO");
 			} catch (Exception e) {
-				Log.e(TAG, "An exception occured:", e);
-				closeInternal();
+				closeInternal(true);
 			}
 			break;
 		case DRIVE:
@@ -337,10 +342,8 @@ public class LJClientService extends Service {
 			} catch (LJNotFoundException e) {
 				stopDrive();
 			} catch (Exception e) {
-				Log.e(TAG, "An exception occured:", e);
-				closeInternal();
+				closeInternal(true);
 			}
-			Log.v(TAG, "FIND");
 		default:
 			break;
 		}
@@ -418,7 +421,7 @@ public class LJClientService extends Service {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public synchronized <T> T getClientProxy(Class<T> proxyInterface){
+	public synchronized <T> T getClientProxy(Class<T> proxyInterface) throws Exception{
 		switch (state.get()) {
 		case BOUND:
 			if(proxyInterface == ServerService.class){
@@ -430,10 +433,10 @@ public class LJClientService extends Service {
 			}
 			try {
 				return ProxyUtil.createClientProxy(getClassLoader(), proxyInterface, jrpc, socket);
-			} catch (IOException e) {
-				Log.e(TAG, "An error occured while creating proxy:", e);
+			} catch (Exception e) {
+				throw e;
+//				Log.e(TAG, "An error occured while creating proxy:", e);
 			}
-			break;
 		default:
 			break;
 		}

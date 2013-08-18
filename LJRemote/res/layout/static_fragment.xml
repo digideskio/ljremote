@@ -36,4 +36,24 @@
         android:text="@string/toggle"
         android:textAllCaps="false" />
 
+    <Button
+        android:id="@+id/up_all"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/static_list"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/up_all" />
+
+    <Button
+        android:id="@+id/clear_all"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/static_list"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/up_all"
+        android:text="@string/clear_all" />
+
 </RelativeLayout>

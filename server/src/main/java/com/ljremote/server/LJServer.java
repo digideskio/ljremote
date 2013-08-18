@@ -220,6 +220,8 @@ public class LJServer {
 			log.error("InterruptedException while waiting for termination", e);
 			throw e;
 		}
+		
+		log.info("Server stopped");
 	}
 
 	/**
@@ -273,6 +275,7 @@ public class LJServer {
 			private String addr;
 			private int port;
 			private int timeOut;
+			private int id;
 			private Object data;
 
 			public ConnectionEvent(EventType type, String clientType,
@@ -283,6 +286,12 @@ public class LJServer {
 				this.addr = addr;
 				this.port = port;
 				this.timeOut = timeOut;
+			}
+
+			public ConnectionEvent(EventType type, String clientType,
+					String addr, int port, int timeOut, int id) {
+				this(type, clientType, addr, port, timeOut);
+				setId(id);
 			}
 
 			public EventType getType() {
@@ -333,6 +342,14 @@ public class LJServer {
 				this.data = data;
 			}
 
+			public int getId() {
+				return id;
+			}
+
+			public void setId(int id) {
+				this.id = id;
+			}
+
 		}
 
 		public void onClientConnectionEvent(ConnectionEvent event);
@@ -353,6 +370,7 @@ public class LJServer {
 		private ThreadPoolExecutor clientHandleExecutors;
 
 		public MultiThreadedServer(int maxClients) {
+			log.debug("MultiThreadedServer");
 			clientHandleExecutors = new ThreadPoolExecutor(maxClients,
 					maxClients, 0, TimeUnit.MILLISECONDS,
 					new LinkedBlockingQueue<Runnable>());
@@ -361,6 +379,7 @@ public class LJServer {
 		}
 
 		public void run() {
+			log.debug("Run MultiThreadedServer");
 			ServerSocket serverSocket = LJServer.this.serverSocket;
 
 			while (LJServer.this.keepRunning.get()) {
@@ -407,13 +426,13 @@ public class LJServer {
 					+ socket.getPort());
 			this.socket = socket;
 			timerExecutor = Executors.newSingleThreadExecutor();
-			event = new ConnectionEvent(EventType.CONNECT, null, socket
-					.getInetAddress().toString(), socket.getPort(),
-					(int) getDefaultClientTimeout());
 			conf= clientManager == null ? null : clientManager.getConfig(socket.getRemoteSocketAddress(), getDefaultClientTimeout());
 			clientTimeOut = conf == null ? DEFAULT_CLIENT_TIMEOUT : conf.getTimeOut();
 			log.info(String.format("Id given to : %s:%d => %d",
 					socket.getInetAddress().getHostAddress(), socket.getPort(), conf == null ? 0 : conf.getId()));
+			event = new ConnectionEvent(EventType.CONNECT, null, socket
+					.getInetAddress().toString(), socket.getPort(),
+					(int) getDefaultClientTimeout(), conf == null ? 0 : conf.getId());
 			try {
 				inputChecker = new InputStreamChecker(socket.getInputStream(), clientTimeOut / 50);
 			} catch (IOException e) {
@@ -422,6 +441,7 @@ public class LJServer {
 		}
 
 		public void run() {
+			log.debug("Run ClientHandle");
 			try {
 				fireOnClientConnectionEvent(event);
 				// keep handling requests
@@ -457,17 +477,28 @@ public class LJServer {
 			} catch (TimeoutException e) {
 				log.warn(String.format("Timeout expired on %s", socket));
 			} finally {
-				// clean up
-				try {
-					socket.close();
-					log.info(String.format("Client %s:%d disconnected",
-							socket.getInetAddress(), socket.getPort()));
-					event.setType(EventType.DISCONNECT);
-					fireOnClientConnectionEvent(event);
-				} catch (IOException e) { /* no-op */
-				}
+				close();
 			}
 		}
+		
+		public void close(){
+			try {
+				socket.close();
+				log.info(String.format("Client %s:%d disconnected",
+						socket.getInetAddress(), socket.getPort()));
+				event.setType(EventType.DISCONNECT);
+				fireOnClientConnectionEvent(event);
+			} catch (IOException e) { /* no-op */
+			}
+		}
+
+		@Override
+		protected void finalize() throws Throwable {
+			log.debug("finalize");
+			close();
+			super.finalize();
+		}
+		
 	}
 
 	private class InputStreamChecker implements Callable<Integer> {

@@ -4,6 +4,16 @@ public class Seq {
 
 	private int id;
 	private String label;
+	
+	public Seq() {
+		super();
+	}
+
+	public Seq(int id, String label) {
+		super();
+		setId(id);
+		setLabel(label);
+	}
 
 	public int getId() {
 		return id;

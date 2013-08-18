@@ -21,16 +21,6 @@ public class LJNotFoundException extends RuntimeException implements JSonRpcReso
 		public JsonError resolveError(Throwable t, Method method,
 				List<JsonNode> arguments) {
 			LJNotFoundException e = ExceptionsUtils.tryGettingCorrectThrown(t, LJNotFoundException.class);
-//			if (t instanceof LJNotFoundException) {
-//				// LJNotFoundException e = (LJNotFoundException) t;
-//				return new JsonError(code, LJNotFoundException.class.getName(),
-//						null);
-//			} else if (t instanceof UndeclaredThrowableException) {
-//				if(((UndeclaredThrowableException) t).getUndeclaredThrowable().getCause() instanceof LJNotFoundException){
-//					return new JsonError(code, LJNotFoundException.class.getName(),
-//							null);
-//				}
-//			}
 			return e == null ? null : new JsonError(code, LJNotFoundException.class.getName(),null);
 		}
 	};
@@ -43,7 +33,7 @@ public class LJNotFoundException extends RuntimeException implements JSonRpcReso
 			if(errorObject.get("code").asInt() == code){
 				return new LJNotFoundException();
 			}
-			return null;
+			return new Exception();
 		}
 	};
 

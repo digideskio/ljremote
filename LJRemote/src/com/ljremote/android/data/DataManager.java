@@ -1,63 +1,92 @@
 package com.ljremote.android.data;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
+import android.util.Log;
 
-import com.ljremote.android.types.Static;
+import com.ljremote.android.json.LJClientService;
+import com.ljremote.android.json.LJClientService.MODE;
+
 
 public class DataManager {
 
+	private final static String TAG = "DataManager";
 	private Database db;
+	private LJClientService ljService;
+	private Context context;
+	private List<OnDatabaseUpdateListener> db_listeners;
+	private StaticManager staticManager ;
+	private CueManager cueManager;
+	private BGCueManager bgCueManager;
+	private CueListManager cueListManager;
+	private SequenceManager seqManager;
+	
+	public interface OnDatabaseUpdateListener {
+		public void onTableUpdateListener(Context context, TABLES table);
+	}
+	
+	public void registerDatabaseUpdateListener(OnDatabaseUpdateListener listener) {
+		db_listeners.add(listener);
+	}
+	
+	public void fireDatabaseUpdate(TABLES table) {
+		for(OnDatabaseUpdateListener listener : db_listeners){
+			listener.onTableUpdateListener(this.context,table);
+		}
+	}
 	
 	public enum TABLES{
-		STATICS,SEQUENCES
+		STATICS,SEQUENCES,CUES, CUELISTS, BGCUES
 	}
 	
 	public DataManager(Context context) {
-//		dbh = new DatabaseHelper(context);
-//		SQLiteDatabase db = dbh.getWritableDatabase();
-//		ContentValues contentValues = new ContentValues();
-//		contentValues.put(Sequences.COL_ID, 0);
-//		contentValues.put(Sequences.COL_NAME, "A sequence");
-//		db.insert(Sequences.TABLE_NAME, null, contentValues);
-//		db.close();
-//		Log.i("coco", "done");
 		db= new Database(context);
-		fillDummyDatabase();
+		this.context = context;
+		ljService= null;
+		db_listeners = new LinkedList<DataManager.OnDatabaseUpdateListener>();
+	}
+	
+	public void bindService ( LJClientService service ) {
+		ljService = service;
+		Log.i(TAG, "Service bound for data");
 	}
 
-	private void fillDummyDatabase() {
-		if(db != null){
-			for(int i=0; i < 20; i++){
-				db.statics().insert(i, "Static " + i, 100, true);
-			}
-		}
+	public boolean checkService() {
+		return ljService != null && ljService.getCurrentMode() == MODE.DRIVE;
 	}
 	
-	public boolean updateStaticState(int id, boolean enabled){
-		return db.statics().update(id, -1, enabled);
-	}
-	
-	public boolean updateStaticIntensity(int id,int intensity){
-		return db.statics().setIntensity(id, intensity);
-	}
-	
-	public Cursor getCursor(TABLES table){
-		switch (table) {
-		case STATICS:
-			return db.statics().getCursor();
-		default:
-			return null;
-		}
-	}
-	
-	
-	public List<Static> getStaticList(){
-		return db == null ? null : db.statics().getStaticList();
+	public StaticManager getStaticManager() {
+		return staticManager = staticManager == null ? staticManager = new StaticManager(this) : staticManager;
 	}
 
+	public SequenceManager getSequenceManager() {
+		return seqManager = seqManager == null ? seqManager = new SequenceManager(this) : seqManager;
+	}
+	
+	public CueManager getCueManager() {
+		return cueManager = cueManager == null ? cueManager = new CueManager(this) : cueManager;
+	}
+
+	public BGCueManager getBGCueManager() {
+		return bgCueManager = bgCueManager == null ? bgCueManager = new BGCueManager(this) : bgCueManager;
+	}
+	
+	public CueListManager getCueListManager() {
+		return cueListManager = cueListManager == null ? cueListManager = new CueListManager(this) : cueListManager;
+	}
+	
+	public LJClientService getService() {
+		return ljService;
+	}
+	
+	public Database getDB(){
+		return db;
+	}
+
+	public Context getContext() {
+		return context;
+	}
+	
 }

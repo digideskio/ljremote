@@ -93,6 +93,7 @@ public class ConnectivityDialogFragment extends DialogFragment implements OnClic
 			serverConnectButton.setText(R.string.disconnect);
 			driverStatusIcon.setImageResource(R.drawable.ic_menu_cycle_red);
 			driverStatusLarge.setText("LJ not driven");
+			driverLaunchButton.setEnabled(true);
 			driverLaunchButton.setText(R.string.drive);
 			break;
 		case UNBOUND:
@@ -102,6 +103,7 @@ public class ConnectivityDialogFragment extends DialogFragment implements OnClic
 			serverConnectButton.setText(R.string.connect);
 			driverStatusIcon.setImageResource(R.drawable.ic_menu_cycle_red);
 			driverStatusLarge.setText("LJ not driven");
+			driverLaunchButton.setEnabled(false);
 			driverLaunchButton.setText(R.string.drive);
 			break;
 		}

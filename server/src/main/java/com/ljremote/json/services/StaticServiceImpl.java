@@ -46,7 +46,6 @@ public class StaticServiceImpl extends AbstractLJService implements
 	}
 
 	public boolean setStaticIntensity(int id, int level) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -66,8 +65,12 @@ public class StaticServiceImpl extends AbstractLJService implements
 	}
 
 	public List<Static> getstatics() {
-		// TODO Auto-generated method stub
-		return null;
+		return driver.statics().getStaticsList();
+	}
+
+	@Override
+	public Log getLog() {
+		return log;
 	}
 
 }

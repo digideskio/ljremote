@@ -3,7 +3,9 @@ package com.ljremote.server.driver;
 import java.util.Arrays;
 import java.util.List;
 
+import com.sun.jna.Callback;
 import com.sun.jna.Native;
+import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import com.sun.jna.WString;
 import com.sun.jna.platform.win32.BaseTSD.ULONG_PTR;
@@ -58,11 +60,19 @@ public interface User32Ex extends com.sun.jna.platform.win32.User32 {
 	class COPYDATASTRUCT extends Structure {
 		static class ByReference extends COPYDATASTRUCT implements
 				Structure.ByReference {
+
+			public ByReference(Pointer lParam) {
+				super(lParam);
+			}
 		}
 
-		ULONG_PTR dwData;
-		DWORD cbData;
-		WString lpData;
+		public ULONG_PTR dwData;
+		public DWORD cbData;
+		public Pointer lpData;
+
+		public COPYDATASTRUCT(Pointer lParam) {
+			super(lParam);
+		}
 
 		@Override
 		protected List<?> getFieldOrder() {
@@ -70,7 +80,26 @@ public interface User32Ex extends com.sun.jna.platform.win32.User32 {
 		}
 	}
 
+	interface WindowProc extends StdCallCallback {
+		public LRESULT callback (HWND hWnd, int uMsg, int wParam, Pointer lParam );
+	}
+	
+	/**
+     * Sets a new address for the window procedure (value to be set).
+     */
+    public static final int GWLP_WNDPROC = -4;
+	
+	/**
+     * Changes an attribute of the specified window
+     * @param   hWnd        A handle to the window
+     * @param   nIndex      The zero-based offset to the value to be set.
+     * @param   callback    The callback function for the value to be set.
+     */
+    public int SetWindowLongA(HWND hWnd, int nIndex, Callback callback);
+	
 	LRESULT SendMessageA(HWND hwnd, int umsg, int wParam, int lParam);
+	LRESULT SendMessageA(HWND lJHandle, int umsg, int wParam,
+			Pointer pointer);
 
 	void PostMessageA(HWND hwnd, int umsg, int wParam, int lParam);
 
@@ -94,4 +123,13 @@ public interface User32Ex extends com.sun.jna.platform.win32.User32 {
 			return null;
 		}
 	}
+
+	LRESULT DefWindowProcA(HWND hWnd, int uMsg, int wParam, Pointer lParam);
+
+	LRESULT DefWindowProcA(HWND hWnd, int uMsg, WPARAM wParam, LPARAM lParam);
+
+	int GetLastError();
+
+	int GetModuleHandleA(Object object);
+
 }

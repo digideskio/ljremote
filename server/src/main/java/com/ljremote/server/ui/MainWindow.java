@@ -34,15 +34,26 @@ import org.apache.commons.logging.LogFactory;
 import com.googlecode.jsonrpc4j.JsonRpcServer;
 import com.googlecode.jsonrpc4j.ProxyUtil;
 import com.ljremote.json.exceptions.LJNotFoundException;
+import com.ljremote.json.services.BGCueService;
+import com.ljremote.json.services.BGCueServiceImpl;
+import com.ljremote.json.services.CueListService;
+import com.ljremote.json.services.CueListServiceImpl;
+import com.ljremote.json.services.CueService;
+import com.ljremote.json.services.CueServiceImpl;
 import com.ljremote.json.services.DriverService;
 import com.ljremote.json.services.DriverServiceImpl;
+import com.ljremote.json.services.SequenceService;
+import com.ljremote.json.services.SequenceServiceImpl;
 import com.ljremote.json.services.ServerService;
+import com.ljremote.json.services.StaticService;
+import com.ljremote.json.services.StaticServiceImpl;
 import com.ljremote.server.ClientManager;
 import com.ljremote.server.LJServer;
 import com.ljremote.server.LJServer.ClientConnectionListener;
 import com.ljremote.server.LJServer.OnServerStatusChangeListener;
 import com.ljremote.server.Main;
 import com.ljremote.server.driver.LJDriver;
+import com.ljremote.server.driver.util.WindowUtil;
 
 public class MainWindow implements OnServerStatusChangeListener, ClientConnectionListener {
 
@@ -162,6 +173,15 @@ public class MainWindow implements OnServerStatusChangeListener, ClientConnectio
 			}
 		});
 		panel_2.add(btnStop);
+		
+		JButton btnPrintAllWindows = new JButton("Print All Windows");
+		btnPrintAllWindows.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				WindowUtil.enumAllWindows();
+			}
+		});
+		panel_2.add(btnPrintAllWindows);
 		panel_1.setLayout(gl_panel_1);
 		
 		Component verticalGlue = Box.createVerticalGlue();
@@ -226,39 +246,65 @@ public class MainWindow implements OnServerStatusChangeListener, ClientConnectio
 			new Object[][] {
 			},
 			new String[] {
-				"Type", "IP Address", "Port", "Time Out"
+				"Id", "Type", "IP Address", "Port", "Time Out"
 			}
 		) {
-			Class<?>[] columnTypes = new Class[] {
-				String.class, String.class, Integer.class, Integer.class
+			Class[] columnTypes = new Class[] {
+				Object.class, String.class, String.class, Integer.class, Integer.class
 			};
-			public Class<?> getColumnClass(int columnIndex) {
+			public Class getColumnClass(int columnIndex) {
 				return columnTypes[columnIndex];
 			}
+			boolean[] columnEditables = new boolean[] {
+				false, true, true, true, true
+			};
+			public boolean isCellEditable(int row, int column) {
+				return columnEditables[column];
+			}
 		});
-		
-		clientTabble.getColumnModel().getColumn(0).setResizable(false);
 		clientTabble.getColumnModel().getColumn(1).setResizable(false);
 		clientTabble.getColumnModel().getColumn(2).setResizable(false);
-		clientTabble.getColumnModel().getColumn(2).setPreferredWidth(35);
 		clientTabble.getColumnModel().getColumn(3).setResizable(false);
-		clientTabble.getColumnModel().getColumn(3).setPreferredWidth(55);
+		clientTabble.getColumnModel().getColumn(3).setPreferredWidth(35);
+		clientTabble.getColumnModel().getColumn(4).setResizable(false);
+		clientTabble.getColumnModel().getColumn(4).setPreferredWidth(55);
 		
 		setDefaultConfig();
 	}
 
 	protected void createAndStartServer() {
 		LJDriver driver = new LJDriver();
-		driver.findLJ();
+		
+		if ( driver == null ) {
+			log.error("Impossible d'initialiser le driver");
+			return;
+		}
 	
+		driver.findLJ();
 		ClientManager clientManager = new ClientManager();
 		DriverService driverService = new DriverServiceImpl(driver);
 		JsonRpcServer jsonRpcServer = new JsonRpcServer(
 				ProxyUtil.createCompositeServiceProxy(
-						Main.class.getClassLoader(), new Object[] {
-							clientManager, driverService, },
-							new Class<?>[] { ServerService.class,
-							DriverService.class, }, true));
+						Main.class.getClassLoader(),
+							new Object[] {
+								clientManager,
+								driverService,
+								new StaticServiceImpl(driver),
+								new CueServiceImpl(driver),
+								new SequenceServiceImpl(driver),
+								new BGCueServiceImpl(driver),
+								new CueListServiceImpl(driver),
+							},
+							new Class<?>[] {
+								ServerService.class,
+								DriverService.class,
+								StaticService.class,
+								CueService.class,
+								SequenceService.class,
+								BGCueService.class,
+								CueListService.class,
+							}
+						, true));
 	
 		jsonRpcServer.setErrorResolver(new LJNotFoundException().getErrorResolver());
 		int maxThreads = 5;
@@ -314,14 +360,14 @@ public class MainWindow implements OnServerStatusChangeListener, ClientConnectio
 	public void onClientConnectionEvent(ConnectionEvent event) {
 		switch (event.getType()) {
 		case CONNECT:
-			((DefaultTableModel) clientTabble.getModel()).addRow(new Object[]{"",event.getAddr(),event.getPort(),event.getTimeOut()});
+			((DefaultTableModel) clientTabble.getModel()).addRow(new Object[]{event.getId(),"",event.getAddr(),event.getPort(),event.getTimeOut()});
 			clientNumber.setText(String.valueOf(++clientNumberInt));
 			break;
 		case DISCONNECT:
 			DefaultTableModel model= (DefaultTableModel) clientTabble.getModel();
 			boolean founded= false;
 			for(int row=0;!founded && row < model.getRowCount();row++){
-				if((Integer) model.getValueAt(row, 2) == event.getPort() && model.getValueAt(row, 1).equals(event.getAddr())){
+				if((Integer) model.getValueAt(row, 3) == event.getPort() && model.getValueAt(row, 2).equals(event.getAddr())){
 					model.removeRow(row);
 					clientNumber.setText(String.valueOf(--clientNumberInt));
 					founded= true;

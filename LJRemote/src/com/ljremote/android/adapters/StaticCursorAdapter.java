@@ -9,18 +9,16 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-import com.ljremote.android.MainActivity;
 import com.ljremote.android.R;
 import com.ljremote.android.data.DataManager.TABLES;
-import com.ljremote.android.data.Database.Statics;
+import com.ljremote.android.data.StaticManager;
+import com.ljremote.json.model.Static;
 
-public class StaticCursorAdapter extends SimpleCursorAdapter {
-	public StaticCursorAdapter(MainActivity main) {
-		super(main, R.layout.static_item, main.getDataManager().getCursor(
-				TABLES.STATICS), Statics.COLUMN_NAMES, null, NO_SELECTION);
+public class StaticCursorAdapter extends AbstractCursorAdapter {
+	public StaticCursorAdapter(StaticManager abstractDataManager) {
+		super(abstractDataManager, R.layout.static_item);
 	}
 
 	@Override
@@ -28,38 +26,32 @@ public class StaticCursorAdapter extends SimpleCursorAdapter {
 		View convertView = LayoutInflater.from(context).inflate(
 				R.layout.static_item, null);
 
-		// ((TextView) convertView.findViewById(R.id.id)).setText(String
-		// .valueOf(cursor.getInt(Statics.NUM_COL_ID)));
-		// ((TextView) convertView.findViewById(R.id.label)).setText(cursor
-		// .getString(Statics.NUM_COL_LABEL));
-		// ((Button) convertView.findViewById(R.id.intensity)).setText(cursor
-		// .getString(Statics.NUM_COL_INTENSITY));
 		bindView(convertView, context, cursor);
 		return convertView;
 	}
 
 	@Override
 	public void bindView(View view, Context context, Cursor cursor) {
-		int id = cursor.getInt(Statics.NUM_COL_ID);
-		boolean enabled = cursor.getInt(Statics.NUM_COL_ENABLED) > 0;
+		Static s = ((StaticManager) manager).getStaticFromCursor(cursor);
 
-		((TextView) view.findViewById(R.id.id)).setText(String.valueOf(id));
+		((TextView) view.findViewById(R.id.id)).setText(String.valueOf(s
+				.getId()));
 		TextView label = (TextView) view.findViewById(R.id.label);
-		label.setText(cursor.getString(Statics.NUM_COL_LABEL));
-		label.setSelected(enabled);
-		if(enabled){
+		label.setText(s.getLabel());
+		label.setSelected(s.isEnable());
+		if (s.isEnable()) {
 			view.setBackgroundResource(R.drawable.green);
 		} else {
 			view.setBackgroundResource(android.R.color.transparent);
 		}
 		Button intensity = (Button) view.findViewById(R.id.intensity);
-		intensity.setText(cursor.getString(Statics.NUM_COL_INTENSITY));
+		intensity.setText(Integer.toString(s.getIntensity()));
 
 		SeekBar seekBar = (SeekBar) view.findViewById(R.id.seek_intensity);
-		seekBar.setProgress(cursor.getInt(Statics.NUM_COL_INTENSITY));
+		seekBar.setProgress(s.getIntensity());
 
-		attachStateUpdater(label, context, id);
-		attachProgressUpdatedListener(seekBar, context, id, intensity);
+		attachStateUpdater(label, context, s.getId());
+		attachProgressUpdatedListener(seekBar, context, s.getId(), intensity);
 	}
 
 	private void attachProgressUpdatedListener(SeekBar seekBar,
@@ -70,18 +62,14 @@ public class StaticCursorAdapter extends SimpleCursorAdapter {
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				int progress = seekBar.getProgress();
 
-				if (((MainActivity) context).getDataManager()
-						.updateStaticIntensity(id, progress)) {
-					swapCursor(((MainActivity) context).getDataManager()
-							.getCursor(TABLES.STATICS));
+				if (((StaticManager) manager).updateIntensity(id, progress)) {
+					reloadCursor();
 				}
 
 			}
 
 			@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
@@ -98,12 +86,17 @@ public class StaticCursorAdapter extends SimpleCursorAdapter {
 
 			@Override
 			public void onClick(View v) {
-				if(((MainActivity) context).getDataManager().updateStaticState(id,!v.isSelected())){
-					swapCursor(((MainActivity) context).getDataManager()
-							.getCursor(TABLES.STATICS));
+				if (((StaticManager) manager).updateState(id, !v.isSelected())) {
+					reloadCursor();
 				}
 			}
 		});
 	}
-	
+
+	@Override
+	public void onTableUpdateListener(Context context, TABLES table) {
+		if (table == TABLES.STATICS) {
+			reloadCursor();
+		}
+	}
 }

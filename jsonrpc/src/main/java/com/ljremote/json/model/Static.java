@@ -7,6 +7,23 @@ public class Static {
 	private int intensity;
 	private boolean enable;
 
+	public Static () {
+	}
+	
+	public Static (int id, String label) {
+		super();
+		setId(id);
+		setLabel(label);
+	}
+	
+	public Static(int id, String label, int intensity, boolean enabled) {
+		super();
+		setId(id);
+		setLabel(label);
+		setIntensity(intensity);
+		setEnable(enabled);
+	}
+	
 	public int getId() {
 		return id;
 	}
@@ -39,4 +56,8 @@ public class Static {
 		this.enable = enable;
 	}
 
+	@Override
+	public String toString() {
+		return String.format("Static[%d,%s,%s,%b]", id,label,intensity, enable);
+	}
 }

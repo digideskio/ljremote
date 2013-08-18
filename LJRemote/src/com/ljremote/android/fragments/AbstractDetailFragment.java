@@ -1,11 +1,25 @@
 package com.ljremote.android.fragments;
 
+import com.ljremote.android.data.AbstractDataManager;
+
+import android.annotation.SuppressLint;
+import android.app.ActionBar.TabListener;
 import android.support.v4.app.Fragment;
 
+@SuppressLint("ValidFragment")
 public class AbstractDetailFragment extends Fragment {
 	
 	protected int str_id;
+	protected AbstractDataManager dataManager;
 	
+	public AbstractDataManager getDataManager() {
+		return dataManager;
+	}
+
+	public void setDataManager(AbstractDataManager dataManager) {
+		this.dataManager = dataManager;
+	}
+
 	public AbstractDetailFragment(int str_id) {
 		this.str_id= str_id;
 	}
@@ -25,5 +39,16 @@ public class AbstractDetailFragment extends Fragment {
 	public void setPosition(int pos) {
 		this.pos = pos;
 	}
+
+	public boolean hasTab() {
+		return false;
+	}
 	
+	public String[] getTabNames() {
+		return new String[]{""};
+	}
+	
+	public TabListener getTabListener(String tag){
+		return null;
+	}
 }

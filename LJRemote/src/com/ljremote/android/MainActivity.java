@@ -3,19 +3,25 @@ package com.ljremote.android;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
+import android.app.ActionBar.Tab;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,12 +43,13 @@ import com.ljremote.android.json.JSonTestActivity;
 import com.ljremote.android.json.LJClientService;
 import com.ljremote.android.json.LJClientService.LocalBinder;
 import com.ljremote.android.json.LJClientService.MODE;
+import com.ljremote.json.exceptions.LJNotFoundException;
 import com.ljremote.json.services.DriverService;
 
 public class MainActivity extends FragmentActivity implements
 		MenuFragment.OnArticleSelectedListener,
-		LJClientService.OnModeChangeListener,
-		OnCommandListener{
+		LJClientService.OnModeChangeListener, OnCommandListener,
+		OnSharedPreferenceChangeListener {
 
 	private final static String TAG = "Main";
 	private DataManager dm;
@@ -65,17 +72,25 @@ public class MainActivity extends FragmentActivity implements
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
+			Log.d(TAG, "onServiceConnected");
 			ljService = ((LocalBinder) service).getService();
 			ljService.registerOnModeChangeListener(MainActivity.this);
+			dm.bindService(ljService);
 			serviceBound = true;
-			try {
-				ljService.setHost("192.168.0.10", 2508);
-				conf.putString(ConnectivityDialogFragment.SOCKET_ADDRESS,
-						"192.168.0.10:2508");
-//				ljService.connect();
-			} catch (UnknownHostException e) {
-				// jsonDisplay.append("\n" + e);
+			if ( ljService.getCurrentMode() == MODE.UNBOUND ) {
+				try {
+					String host_adress = getSettings().getString(
+							SettingsActivity.SERVER_HOST_ADDRESS, "0.0.0.0");
+					int host_port = Integer.parseInt(getSettings().getString(
+							SettingsActivity.SERVER_HOST_PORT, "-1"));
+					ljService.setHost(host_adress, host_port);
+					conf.putString(ConnectivityDialogFragment.SOCKET_ADDRESS,
+							host_adress + ":" + host_port);
+				} catch (UnknownHostException e) {
+				} catch (IllegalArgumentException e) {
+				}
 			}
+			onModeChange(ljService.getCurrentMode());
 		}
 	};
 
@@ -85,7 +100,7 @@ public class MainActivity extends FragmentActivity implements
 		setContentView(R.layout.activity_main);
 		initConf();
 
-//		dm = new DataManager(this);
+		dm = new DataManager(this);
 
 		detailsFragments = new ArrayList<AbstractDetailFragment>();
 		registerFragment(new StaticFragment());
@@ -105,13 +120,12 @@ public class MainActivity extends FragmentActivity implements
 		final ActionBar actionBar = getActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
 
-
 		// Service
 		Intent intent = new Intent(this, LJClientService.class);
 		bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 	}
 
-	private void initConf(){
+	private void initConf() {
 		conf = new Bundle();
 		conf.putSerializable(ConnectivityDialogFragment.SERVICE_MODE,
 				MODE.UNBOUND);
@@ -119,7 +133,7 @@ public class MainActivity extends FragmentActivity implements
 				"0.0.0.0:2508");
 		conf.putString(ConnectivityDialogFragment.LJ_VERSION, "0.0.0");
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Intent intent = null;
@@ -135,6 +149,7 @@ public class MainActivity extends FragmentActivity implements
 			startActivity(new Intent(this, JSonTestActivity.class));
 			break;
 		case R.id.menu_change_mode:
+			updateConf();
 			connectivityDialog.setArguments(conf);
 			connectivityDialog.show(getSupportFragmentManager(), TAG);
 			break;
@@ -156,6 +171,17 @@ public class MainActivity extends FragmentActivity implements
 		return super.onOptionsItemSelected(item);
 	}
 
+	private void updateConf() {
+		String host_adress = getSettings().getString(
+				SettingsActivity.SERVER_HOST_ADDRESS, "0.0.0.0");
+		int host_port = Integer.parseInt(getSettings().getString(
+				SettingsActivity.SERVER_HOST_PORT, "-1"));
+		conf.putString(ConnectivityDialogFragment.SOCKET_ADDRESS, host_adress
+				+ ":" + host_port);
+		conf.putSerializable(ConnectivityDialogFragment.SERVICE_MODE,
+				ljService.getCurrentMode());
+	}
+
 	public boolean deviceIsLargeScreen() {
 		return (getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE;
 	}
@@ -167,6 +193,9 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
+		Map<String, ?> map = getSettings().getAll();
+		Log.d(TAG, "Settings : " + map.toString());
+		getSettings().registerOnSharedPreferenceChangeListener(this);
 		if (deviceIsLargeScreen()) {
 			// on a large screen device ...
 			getSupportFragmentManager().beginTransaction()
@@ -181,6 +210,9 @@ public class MainActivity extends FragmentActivity implements
 			}
 			getSupportFragmentManager().beginTransaction()
 					.replace(R.id.detail_container, fragment).commit();
+		}
+		if ( serviceBound && ljService != null ){
+			onModeChange(ljService.getCurrentMode());
 		}
 	}
 
@@ -241,8 +273,24 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	public void onArticleSelected(int position) {
 		AbstractDetailFragment fragment = detailsFragments.get(position);
-		getSupportFragmentManager().beginTransaction()
-				.replace(R.id.detail_container, fragment).commit();
+		if (fragment.hasTab()) {
+			final ActionBar actionBar = getActionBar();
+			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+			actionBar.setDisplayShowTitleEnabled(false);
+			String[] tabs = fragment.getTabNames();
+			
+			for(int i=0;i<tabs.length;i++){
+				Tab tab = actionBar.newTab()
+						.setText(tabs[i])
+						.setTabListener(fragment.getTabListener(tabs[i]));
+				actionBar.addTab(tab);
+				}
+//			getSupportFragmentManager().beginTransaction()
+//			.replace(R.id.detail_container, fragment, tabs[0]).commit();
+		} else {
+			getSupportFragmentManager().beginTransaction()
+					.replace(R.id.detail_container, fragment).commit();
+		}
 		lastLoadFragmentPosition = position;
 	}
 
@@ -261,14 +309,14 @@ public class MainActivity extends FragmentActivity implements
 	public void onModeChange(MODE newMode) {
 		conf.putSerializable(ConnectivityDialogFragment.SERVICE_MODE, newMode);
 		menuFragment.changeServerMode(newMode);
-		if ( connectivityDialog.isVisible() ) {
+		if (connectivityDialog.isVisible()) {
 			connectivityDialog.updateUI(conf);
 		}
 	}
 
 	@Override
 	public void onCommand(COMMAND cmd, String[] args) {
-		if ( ljService == null || !serviceBound ) {
+		if (ljService == null || !serviceBound) {
 			return;
 		}
 		switch (cmd) {
@@ -278,13 +326,24 @@ public class MainActivity extends FragmentActivity implements
 
 				@Override
 				protected String doInBackground(Void... params) {
-					return ljService.getClientProxy(DriverService.class).getLJversion();
+					try {
+						return ljService.getClientProxy(DriverService.class)
+								.getLJversion();
+					} catch (LJNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					return null;
 				}
 
 				@Override
 				protected void onPostExecute(String result) {
-					if ( result != null ) {
-						conf.putString(ConnectivityDialogFragment.LJ_VERSION, result);
+					if (result != null) {
+						conf.putString(ConnectivityDialogFragment.LJ_VERSION,
+								result);
 						connectivityDialog.updateUI(conf);
 					}
 				}
@@ -302,6 +361,34 @@ public class MainActivity extends FragmentActivity implements
 			break;
 		default:
 			break;
+		}
+	}
+
+	public SharedPreferences getSettings() {
+		return PreferenceManager.getDefaultSharedPreferences(this);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		getSettings().unregisterOnSharedPreferenceChangeListener(this);
+	}
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+			String key) {
+		Log.d(TAG, "Preferences changed : " + key);
+		if (key.equals(SettingsActivity.SERVER_HOST_ADDRESS)
+				|| key.equals(SettingsActivity.SERVER_HOST_PORT)) {
+			String host_adress = sharedPreferences.getString(
+					SettingsActivity.SERVER_HOST_ADDRESS, "0.0.0.0");
+			int host_port = Integer.parseInt(getSettings().getString(
+					SettingsActivity.SERVER_HOST_PORT, "-1"));
+			if (ljService != null && serviceBound) {
+				unbindService(serviceConnection);
+				Intent intent = new Intent(this, LJClientService.class);
+				bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+			}
 		}
 	}
 }
