@@ -6,7 +6,7 @@
 
     <RelativeLayout
         android:id="@+id/serverLayout"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_alignTop="@+id/status_icon"
+            android:layout_alignTop="@+id/server_status_icon"
             android:layout_toRightOf="@+id/server_status_icon"
             android:text="Large Text"
             android:textAppearance="?android:attr/textAppearanceLarge" />
@@ -39,21 +39,24 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/server_status_icon"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
             android:gravity="center" >
 
             <Button
                 android:id="@+id/server_connect_button"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
+                android:layout_weight="1"
                 android:text="@string/connect" />
 
             <Button
                 android:id="@+id/server_setting_button"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_weight="1"
                 android:text="@string/menu_settings" />
+
         </LinearLayout>
 
         <TextView
@@ -93,21 +96,26 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/driver_status_icon"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
             android:gravity="center" >
 
             <Button
                 android:id="@+id/driver_drive_button"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
+                android:layout_gravity="center"
+                android:layout_weight="1"
                 android:text="@string/drive" />
 
             <Button
                 android:id="@+id/driver_setting_button"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_weight="1"
                 android:text="@string/menu_settings" />
+
         </LinearLayout>
 
         <TextView

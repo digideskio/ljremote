@@ -9,13 +9,20 @@ public abstract class AbstractCursorAdapter extends SimpleCursorAdapter implemen
 	protected AbstractDataManager manager;
 
 	public AbstractCursorAdapter(AbstractDataManager manager, int layout) {
+		this(manager, layout, true);
+	}
+
+	public AbstractCursorAdapter(AbstractDataManager manager, int layout, boolean register) {
 		super(manager.getContext(), layout, manager.getCursor(), manager
 				.getCursorColumnNames(), null, NO_SELECTION);
 		this.manager = manager;
-		this.manager.getMainDataManager().registerDatabaseUpdateListener(this);
+		if(register){
+			this.manager.getMainDataManager().registerDatabaseUpdateListener(this);
+		}
 	}
-
+	
 	protected void reloadCursor() {
 		changeCursor(manager.getCursor());
 	}
+	
 }

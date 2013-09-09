@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
         Base application theme, dependent on API level. This theme is replaced
@@ -15,8 +15,21 @@
     <!-- Application theme. -->
     <style name="AppTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+        <item name="MyServerStatus">@style/ServerStatus</item>
     </style>
-
-    
-
+    <style name="AppTheme.ApplyServerStatusBound">
+        <item name="MyServerStatus">@style/ServerStatus.Bound</item>
+    </style>
+    <style name="ServerStatus">
+        <item name="android:src">@drawable/ic_menu_cycle_red</item>
+        <item name="android:text">@string/server_mode_unbound</item>
+    </style>
+    <style name="ServerStatus.Bound">
+        <item name="android:src">@drawable/ic_menu_cycle_orange</item>
+        <item name="android:text">@string/server_mode_bound</item>
+    </style>
+    <style name="ServerStatus.Driver">
+        <item name="android:src">@drawable/ic_menu_cycle_green</item>
+        <item name="android:text">@string/server_mode_driver</item>
+    </style>
 </resources>

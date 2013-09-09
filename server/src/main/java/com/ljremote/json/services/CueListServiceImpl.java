@@ -23,5 +23,17 @@ public class CueListServiceImpl extends AbstractLJService implements
 	public Log getLog() {
 		return log;
 	}
+	public int getCurrentCueListId() {
+		return driver.cueLists().getCurrentCueList();
+	}
+	public Boolean loadCueList(int id) {
+		return driver.cueLists().loadCueList(id);
+	}
+	public Boolean controlGo() {
+		return driver.cueLists().cueListGo();
+	}
+	public Boolean controlBack() {
+		return driver.cueLists().cueListBack();
+	}
 
 }

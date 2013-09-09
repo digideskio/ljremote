@@ -5,11 +5,11 @@
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/menu_settings"/>
-    <item
+    <!-- <item
         android:id="@+id/menu_testjson"
-        android:showAsAction="always"
-        android:title="@string/menu_testjson"/>
-    <item android:id="@+id/menu_change_mode" android:showAsAction="always" android:title="Status" android:icon="@drawable/ic_menu_cycle_red">
+        android:showAsAction="never"
+        android:title="@string/menu_testjson"/>-->
+    <item android:id="@+id/menu_black_out" android:title="@string/black_out" android:showAsAction="always"></item><item android:id="@+id/menu_change_mode" android:showAsAction="always" android:title="Status" android:icon="@drawable/ic_menu_cycle_red">
         <!-- <menu>
             <group
                 android:id="@+id/menu_change_mode_groupe"
@@ -32,5 +32,6 @@
             <item android:id="@+id/item1" android:visible="true" android:menuCategory="container" android:showAsAction="always" android:actionViewClass="android.widget.SearchView"/>
         </menu> -->
     </item>
+    
 
 </menu>

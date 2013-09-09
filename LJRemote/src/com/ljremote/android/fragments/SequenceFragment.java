@@ -23,6 +23,7 @@ public class SequenceFragment extends AbstractDetailFragment implements OnClickL
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		Log.e("SequenceFragment", "onCreateView " + savedInstanceState + ", container -> " + container);
 		View mainView = inflater.inflate(R.layout.sequence_fragment, null, true);
 		MainActivity main = (MainActivity) getActivity();
 		setDataManager(main.getDataManager().getSequenceManager());

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ServerConnectionStates">
+        <attr name="serverStatus">
+            <flag name="unbound" value="0"/>
+            <flag name="bound" value="1"/>
+            <flag name="drive" value="2"/>
+        </attr>
+    </declare-styleable>
+    <attr name="MyServerStatus"/>
+</resources>

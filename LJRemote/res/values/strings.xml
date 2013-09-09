@@ -15,6 +15,16 @@
     <string name="undrive">Stop Drive</string>
     <string name="up_all">Up All</string>
     <string name="clear_all">Clear All</string>
+    <string name="load_cue">Load Cue</string>
+    <string name="black_out">BLACK OUT</string>
+    <string name="ljfunctions">LJ Functions</string>
+    <string name="emptyTabHost">No data for now</string>
+    <string name="fName_DmxOut">DMX Out</string>
+    <string name="sync">Synchronise</string>
+    <string name="sync_short">SYNC</string>
+    <string name="hideExistingChannels">Hide Existing Channels</string>
+    <string name="dmx_out_add_dialog_title">Add/Remove DMXOut Channes</string>
+    <string name="add_selected">Add Selected</string>
 
 
 </resources>

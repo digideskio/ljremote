@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.ljremote.server.driver.User32Ex.COPYDATASTRUCT;
 import com.sun.jna.Callback;
+import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinDef;
@@ -24,6 +25,7 @@ import com.sun.jna.win32.StdCallLibrary.StdCallCallback;
 public class Win32CopyDataMonitor {
 	
 	private static final Log log = LogFactory.getLog(Win32CopyDataMonitor.class);
+
 	public static final int RETRY = 3;
 	public static final String WINDOW_NAME = "CDM receiver";
 	private HWND viewer = null;
@@ -81,13 +83,13 @@ public class Win32CopyDataMonitor {
 				if ( viewer == null ) {
 					createWindow();
 					viewer = User32Ex.INSTANCE.FindWindowA("SunAwtFrame", "CDM receiver");
+					wcmFrame.setVisible(false);
 				}
 			}
 			log.debug("View : " + String.valueOf(viewer));
 			User32Ex.INSTANCE.SetWindowLongA(viewer, User32Ex.GWLP_WNDPROC, this);
 			
 			MSG msg = new MSG();
-//			
 			final HANDLE handles[] = { event };
 			while (true) {
 				int result = User32Ex.INSTANCE.MsgWaitForMultipleObjects(
@@ -112,13 +114,13 @@ public class Win32CopyDataMonitor {
 	
 		private void createWindow(){
 			wcmFrame = new JFrame(WINDOW_NAME);
-			wcmFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			wcmFrame.setVisible(true);
 		}
 		
-		public LRESULT callback(final HWND hWnd, final int uMsg, final int wParam, final Pointer lParam){
-			if(uMsg == User32Ex.WM_COPYDATA){
-				log.debug("Message from " + String.valueOf(hWnd) + " : " + uMsg + ", wnd : " + Integer.toHexString(wParam) + ", lParam : " + lParam);
+		@SuppressWarnings("unused")
+		public LRESULT callback(final HWND hWnd, final NativeLong uMsg, final NativeLong wParam, final Pointer lParam){
+			if(uMsg.intValue() == User32Ex.WM_COPYDATA){
+				log.debug("Message from " + String.valueOf(hWnd) + " : " + uMsg + ", wnd : " + Integer.toHexString(wParam.intValue()) + ", lParam : " + lParam);
 				COPYDATASTRUCT copy_data = new COPYDATASTRUCT(lParam);
 				copy_data.read();
 				System.out.println(copy_data);

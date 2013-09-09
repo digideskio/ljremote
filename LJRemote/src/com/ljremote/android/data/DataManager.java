@@ -22,6 +22,8 @@ public class DataManager {
 	private BGCueManager bgCueManager;
 	private CueListManager cueListManager;
 	private SequenceManager seqManager;
+	private LJFunctionManager lJFunctionManager;
+	private DMXOutManager dmxOutManager;
 	
 	public interface OnDatabaseUpdateListener {
 		public void onTableUpdateListener(Context context, TABLES table);
@@ -38,7 +40,7 @@ public class DataManager {
 	}
 	
 	public enum TABLES{
-		STATICS,SEQUENCES,CUES, CUELISTS, BGCUES
+		STATICS,SEQUENCES,CUES, CUELISTS, BGCUES, LJFUNCTIONS, DMXOUT
 	}
 	
 	public DataManager(Context context) {
@@ -75,6 +77,14 @@ public class DataManager {
 	
 	public CueListManager getCueListManager() {
 		return cueListManager = cueListManager == null ? cueListManager = new CueListManager(this) : cueListManager;
+	}
+
+	public LJFunctionManager getLJFunctionManager() {
+		return lJFunctionManager = lJFunctionManager == null ? lJFunctionManager = new LJFunctionManager(this) : lJFunctionManager;
+	}
+
+	public DMXOutManager getDMXOutManager() {
+		return dmxOutManager = dmxOutManager == null ? dmxOutManager = new DMXOutManager(this) : dmxOutManager;
 	}
 	
 	public LJClientService getService() {

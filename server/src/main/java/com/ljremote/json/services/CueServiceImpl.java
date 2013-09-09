@@ -22,13 +22,13 @@ public class CueServiceImpl extends AbstractLJService implements CueService {
 	}
 
 	public int getCurrentCueId() {
-		// TODO Auto-generated method stub
-		return 0;
+		int id = driver.cues().getCurrentCue();
+		log.debug("Current Cue :" + id);
+		return id;
 	}
 
 	public Boolean LoadCue(int id) {
-		// TODO Auto-generated method stub
-		return false;
+		return driver.cues().loadCue(id);
 	}
 
 	public List<Cue> getCueList() {
@@ -37,7 +37,6 @@ public class CueServiceImpl extends AbstractLJService implements CueService {
 	}
 
 	public Boolean trigSequence(int pos, TrigMode mode) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

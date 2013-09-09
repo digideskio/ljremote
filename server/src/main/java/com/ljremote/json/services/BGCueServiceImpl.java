@@ -27,4 +27,9 @@ public class BGCueServiceImpl extends AbstractLJService implements BGCueService 
 		return log;
 	}
 
+
+	public List<Integer> getCurrentBGCue() {
+		return null;
+	}
+
 }

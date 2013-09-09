@@ -7,7 +7,6 @@ import java.util.Map;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
-import android.app.ActionBar.Tab;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -32,14 +31,15 @@ import com.ljremote.android.fragments.BGCueFragment;
 import com.ljremote.android.fragments.ConnectivityDialogFragment;
 import com.ljremote.android.fragments.ConnectivityDialogFragment.COMMAND;
 import com.ljremote.android.fragments.ConnectivityDialogFragment.OnCommandListener;
-import com.ljremote.android.fragments.CueFragment;
 import com.ljremote.android.fragments.CueListFragment;
+import com.ljremote.android.fragments.DMXOutFragment;
 import com.ljremote.android.fragments.MasterIntFragment;
 import com.ljremote.android.fragments.MenuFragment;
 import com.ljremote.android.fragments.SequenceFragment;
 import com.ljremote.android.fragments.StaticFragment;
+import com.ljremote.android.fragments.TabbedCueFragment;
+import com.ljremote.android.fragments.TabbedLJFunctionFragment;
 import com.ljremote.android.json.JSonRpcTask;
-import com.ljremote.android.json.JSonTestActivity;
 import com.ljremote.android.json.LJClientService;
 import com.ljremote.android.json.LJClientService.LocalBinder;
 import com.ljremote.android.json.LJClientService.MODE;
@@ -77,7 +77,7 @@ public class MainActivity extends FragmentActivity implements
 			ljService.registerOnModeChangeListener(MainActivity.this);
 			dm.bindService(ljService);
 			serviceBound = true;
-			if ( ljService.getCurrentMode() == MODE.UNBOUND ) {
+			if (ljService.getCurrentMode() == MODE.UNBOUND) {
 				try {
 					String host_adress = getSettings().getString(
 							SettingsActivity.SERVER_HOST_ADDRESS, "0.0.0.0");
@@ -93,22 +93,27 @@ public class MainActivity extends FragmentActivity implements
 			onModeChange(ljService.getCurrentMode());
 		}
 	};
+	private MenuItem itemChangeMode;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.e(TAG, "onCreate " + savedInstanceState + ", "
+				+ lastLoadFragmentPosition);
 		setContentView(R.layout.activity_main);
 		initConf();
 
 		dm = new DataManager(this);
 
 		detailsFragments = new ArrayList<AbstractDetailFragment>();
+		registerFragment(new TabbedLJFunctionFragment());
 		registerFragment(new StaticFragment());
 		registerFragment(new SequenceFragment());
-		registerFragment(new CueFragment());
+		registerFragment(new TabbedCueFragment());
 		registerFragment(new CueListFragment());
 		registerFragment(new BGCueFragment());
 		registerFragment(new MasterIntFragment());
+		registerFragment(new DMXOutFragment());
 
 		menuFragment = new MenuFragment();
 
@@ -123,6 +128,12 @@ public class MainActivity extends FragmentActivity implements
 		// Service
 		Intent intent = new Intent(this, LJClientService.class);
 		bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+	}
+
+	@Override
+	protected void onDestroy() {
+		unbindService(serviceConnection);
+		super.onDestroy();
 	}
 
 	private void initConf() {
@@ -141,34 +152,41 @@ public class MainActivity extends FragmentActivity implements
 		case android.R.id.home:
 			// if (!deviceIsLargeScreen() && lastLoadFragmentPosition > 0) {
 			// app icon in action bar clicked; go home
-			intent = new Intent(this, MainActivity.class);
-			startActivity(intent);
+			// intent = new Intent(this, MainActivity.class);
+			// startActivity(intent);
 			// }
-			return true;
-		case R.id.menu_testjson:
-			startActivity(new Intent(this, JSonTestActivity.class));
+			// return true;
+			if (!deviceIsLargeScreen()) {
+				if (serviceBound && ljService != null) {
+					Bundle args = new Bundle();
+					args.putSerializable(MenuFragment.SERVICE_MODE,
+							ljService.getCurrentMode());
+					menuFragment.setArguments(args);
+				}
+				getSupportFragmentManager().beginTransaction()
+						.replace(R.id.detail_container, menuFragment).commit();
+			}
 			break;
+		// case R.id.menu_testjson:
+		// startActivity(new Intent(this, JSonTestActivity.class));
+		// break;
 		case R.id.menu_change_mode:
 			updateConf();
 			connectivityDialog.setArguments(conf);
 			connectivityDialog.show(getSupportFragmentManager(), TAG);
 			break;
-		// case R.id.menu_mode_bound:
-		// onModeChange(MODE.BOUND);
-		// break;
-		// case R.id.menu_mode_unbound:
-		// onModeChange(MODE.UNBOUND);
-		// break;
-		// case R.id.menu_mode_drive:
-		// onModeChange(MODE.DRIVE);
-		// break;
 		case R.id.menu_settings:
 			intent = new Intent(this, SettingsActivity.class);
 			startActivity(intent);
 			return true;
+		case R.id.menu_black_out:
+			toggleBlackOut(item);
 		default:
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	private void toggleBlackOut(MenuItem item) {
 	}
 
 	private void updateConf() {
@@ -192,6 +210,7 @@ public class MainActivity extends FragmentActivity implements
 
 	@Override
 	protected void onResume() {
+		Log.d(TAG, "onResume" + ", " + lastLoadFragmentPosition);
 		super.onResume();
 		Map<String, ?> map = getSettings().getAll();
 		Log.d(TAG, "Settings : " + map.toString());
@@ -200,6 +219,16 @@ public class MainActivity extends FragmentActivity implements
 			// on a large screen device ...
 			getSupportFragmentManager().beginTransaction()
 					.replace(R.id.menu_container, menuFragment).commit();
+			Fragment fragment = null;
+			if (lastLoadFragmentPosition >= 0
+					&& lastLoadFragmentPosition < detailsFragments.size()) {
+				fragment = detailsFragments.get(lastLoadFragmentPosition);
+				Log.d(TAG, "toto " + detailsFragments.size() + ", f-> "
+						+ fragment);
+				getSupportFragmentManager().executePendingTransactions();
+				getSupportFragmentManager().beginTransaction()
+						.replace(R.id.detail_container, fragment).commit();
+			}
 		} else {
 			Fragment fragment = null;
 			if (lastLoadFragmentPosition < 0
@@ -211,7 +240,7 @@ public class MainActivity extends FragmentActivity implements
 			getSupportFragmentManager().beginTransaction()
 					.replace(R.id.detail_container, fragment).commit();
 		}
-		if ( serviceBound && ljService != null ){
+		if (serviceBound && ljService != null) {
 			onModeChange(ljService.getCurrentMode());
 		}
 	}
@@ -234,12 +263,32 @@ public class MainActivity extends FragmentActivity implements
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.activity_main, menu);
+		itemChangeMode = menu.findItem(R.id.menu_change_mode);
 		return true;
 	}
 
 	public boolean registerFragment(AbstractDetailFragment fragment) {
 		if (detailsFragments.add(fragment)) {
 			fragment.setPosition(detailsFragments.size() - 1);
+			return true;
+		}
+		return false;
+	}
+
+	public boolean updateFragment(AbstractDetailFragment oldFragment,
+			AbstractDetailFragment newFragment) {
+		return updateFragment(oldFragment.getPosition(), newFragment);
+	}
+
+	public boolean updateFragment(int position, AbstractDetailFragment fragment) {
+		if (position < 0 || position >= detailsFragments.size()) {
+			return false;
+		}
+		AbstractDetailFragment oldFragment = detailsFragments.get(position);
+		if (detailsFragments.set(position, fragment).equals(oldFragment)) {
+			Log.d(TAG, "Fragment " + position + " update " + oldFragment
+					+ " ====> " + fragment);
+			fragment.setPosition(position);
 			return true;
 		}
 		return false;
@@ -256,11 +305,22 @@ public class MainActivity extends FragmentActivity implements
 		return true;
 	}
 
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		outState.putInt(STATE_LAST_LOAD_FRAGMENT_POS, lastLoadFragmentPosition);
-	}
+	// @Override
+	// protected void onSaveInstanceState(Bundle outState) {
+	// outState.putInt(STATE_LAST_LOAD_FRAGMENT_POS, lastLoadFragmentPosition);
+	// Log.d(TAG, "onSaveInstanceState " + outState);
+	// super.onSaveInstanceState(outState);
+	// }
+	//
+	//
+	//
+	// @Override
+	// protected void onRestoreInstanceState(Bundle savedInstanceState) {
+	// Log.d(TAG, "onRestoreInstanceState " + savedInstanceState);
+	// lastLoadFragmentPosition = savedInstanceState == null ? -1
+	// : savedInstanceState.getInt(STATE_LAST_LOAD_FRAGMENT_POS, -1);
+	// super.onRestoreInstanceState(savedInstanceState);
+	// }
 
 	public List<String> getFragmentLabels() {
 		List<String> labels = new ArrayList<String>(detailsFragments.size());
@@ -273,24 +333,8 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	public void onArticleSelected(int position) {
 		AbstractDetailFragment fragment = detailsFragments.get(position);
-		if (fragment.hasTab()) {
-			final ActionBar actionBar = getActionBar();
-			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-			actionBar.setDisplayShowTitleEnabled(false);
-			String[] tabs = fragment.getTabNames();
-			
-			for(int i=0;i<tabs.length;i++){
-				Tab tab = actionBar.newTab()
-						.setText(tabs[i])
-						.setTabListener(fragment.getTabListener(tabs[i]));
-				actionBar.addTab(tab);
-				}
-//			getSupportFragmentManager().beginTransaction()
-//			.replace(R.id.detail_container, fragment, tabs[0]).commit();
-		} else {
-			getSupportFragmentManager().beginTransaction()
-					.replace(R.id.detail_container, fragment).commit();
-		}
+		getSupportFragmentManager().beginTransaction()
+				.replace(R.id.detail_container, fragment).commit();
 		lastLoadFragmentPosition = position;
 	}
 
@@ -308,7 +352,25 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	public void onModeChange(MODE newMode) {
 		conf.putSerializable(ConnectivityDialogFragment.SERVICE_MODE, newMode);
-		menuFragment.changeServerMode(newMode);
+		// TypedArray a = getTheme().obtainStyledAttributes(new
+		// int[]{R.attr.MyServerStatus});
+		// Log.d(TAG, "TypedArray : " + a);
+		// int id = a.getResourceId(0, 0);
+		// Log.d(TAG, "Expected : " + R.style.ServerStatus + ", actual : " +
+		// id);
+		// a.recycle();
+		//
+		// getTheme().applyStyle(R.style.AppTheme_ApplyServerStatusBound, true);
+		//
+		// TypedArray b = getTheme().obtainStyledAttributes(new
+		// int[]{R.attr.MyServerStatus});
+		// Log.d(TAG, "TypedArray : " + b);
+		// int idb = a.getResourceId(0, 0);
+		// Log.d(TAG, "Expected : " + R.style.ServerStatus_Bound + ", actual : "
+		// + idb);
+		// a.recycle();
+
+		menuFragment.changeServerMode(newMode, itemChangeMode);
 		if (connectivityDialog.isVisible()) {
 			connectivityDialog.updateUI(conf);
 		}
@@ -370,8 +432,9 @@ public class MainActivity extends FragmentActivity implements
 
 	@Override
 	protected void onPause() {
-		super.onPause();
+		Log.d(TAG, "onPause");
 		getSettings().unregisterOnSharedPreferenceChangeListener(this);
+		super.onPause();
 	}
 
 	@Override
@@ -391,4 +454,5 @@ public class MainActivity extends FragmentActivity implements
 			}
 		}
 	}
+
 }

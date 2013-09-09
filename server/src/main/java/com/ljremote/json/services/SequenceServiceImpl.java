@@ -26,4 +26,8 @@ public class SequenceServiceImpl extends AbstractLJService implements
 		return log;
 	}
 
+	public int getCurrentSequenceId() {
+		return driver.sequences().getCurrentSeq();
+	}
+
 }

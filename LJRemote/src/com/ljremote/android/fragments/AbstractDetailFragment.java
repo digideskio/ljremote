@@ -1,10 +1,12 @@
 package com.ljremote.android.fragments;
 
+import com.ljremote.android.MainActivity;
 import com.ljremote.android.data.AbstractDataManager;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar.TabListener;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 
 @SuppressLint("ValidFragment")
 public class AbstractDetailFragment extends Fragment {
@@ -48,7 +50,7 @@ public class AbstractDetailFragment extends Fragment {
 		return new String[]{""};
 	}
 	
-	public TabListener getTabListener(String tag){
+	public TabListener getTabListener(FragmentActivity mainActivity, String tag){
 		return null;
 	}
 }

@@ -30,7 +30,8 @@
             android:screenOrientation="landscape" >
         </activity>
 
-        <service android:name="com.ljremote.android.json.LJClientService" >
+        <service android:name="com.ljremote.android.json.LJClientService" 
+            android:exported="false">
         </service>
 
         <receiver android:name="com.ljremote.android.json.KeepAliveAlarm" >

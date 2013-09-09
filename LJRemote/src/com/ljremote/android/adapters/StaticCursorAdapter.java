@@ -2,9 +2,12 @@ package com.ljremote.android.adapters;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
+import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.SeekBar;
@@ -82,6 +85,15 @@ public class StaticCursorAdapter extends AbstractCursorAdapter {
 
 	private void attachStateUpdater(View view, final Context context,
 			final int id) {
+//		view.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
+//			
+//			@Override
+//			public void onCreateContextMenu(ContextMenu menu, View v,
+//					ContextMenuInfo menuInfo) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//		});
 		view.setOnClickListener(new OnClickListener() {
 
 			@Override

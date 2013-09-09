@@ -13,7 +13,7 @@
         android:contentDescription="TODO"
         android:cropToPadding="true"
         android:scaleType="fitCenter"
-        android:src="@drawable/ic_menu_cycle_red"
+        style="?attr/MyServerStatus"
         tools:ignore="HardcodedText,ContentDescription" />
 
     <TextView
@@ -24,7 +24,7 @@
         android:layout_alignParentRight="true"
         android:layout_toRightOf="@+id/server_mode_icon"
         android:gravity="center_vertical"
-        android:text="@string/server_mode_unbound"
+        style="?attr/MyServerStatus"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <ListView

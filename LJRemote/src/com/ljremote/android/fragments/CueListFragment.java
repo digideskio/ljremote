@@ -23,7 +23,7 @@ public class CueListFragment extends AbstractDetailFragment implements OnClickLi
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View mainView = inflater.inflate(R.layout.cuelist_fragment, null, true);
+		View mainView = inflater.inflate(R.layout.cuelist_list_fragment, null, true);
 		MainActivity main = (MainActivity) getActivity();
 		setDataManager(main.getDataManager().getCueListManager());
 		
