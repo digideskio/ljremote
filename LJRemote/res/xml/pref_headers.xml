@@ -3,10 +3,13 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="${packageName}.SettingsActivity$GeneralPreferenceFragment"
+        android:fragment="com.ljremote.android.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_general" />
     <header
-        android:fragment="${packageName}.SettingsActivity$ServerPreferenceFragment"
+        android:fragment="com.ljremote.android.SettingsActivity$ServerPreferenceFragment"
         android:title="@string/pref_header_server" />
+    <header
+        android:fragment="com.ljremote.android.SettingsActivity$DmxOutOverridePreferenceFragment"
+        android:title="@string/fName_DmxOut" />
 
 </preference-headers>

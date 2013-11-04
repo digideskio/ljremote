@@ -30,7 +30,7 @@ import android.text.TextUtils;
  * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
  */
-public class SettingsActivity extends PreferenceActivity {
+public class CopyOfSettingsActivity extends PreferenceActivity {
 	/**
 	 * Determines whether to always show the simplified settings UI, where
 	 * settings are presented in a single list. When false, settings are shown
@@ -41,76 +41,79 @@ public class SettingsActivity extends PreferenceActivity {
 	public static final String SERVER_HOST_ADDRESS = "server_host_address";
 	public static final String SERVER_HOST_PORT = "server_host_port";
 
-//	@Override
-//	protected void onPostCreate(Bundle savedInstanceState) {
-//		super.onPostCreate(savedInstanceState);
-//		
-//		setupSimplePreferencesScreen();
-//	}
-//
-//	/**
-//	 * Shows the simplified settings UI if the device configuration if the
-//	 * device configuration dictates that a simplified, single-pane UI should be
-//	 * shown.
-//	 */
-//	private void setupSimplePreferencesScreen() {
-//		if (!isSimplePreferences(this)) {
-//			return;
-//		}
-//
-//		// In the simplified UI, fragments are not used at all and we instead
-//		// use the older PreferenceActivity APIs.
-//
-//		// Add 'general' preferences.
-//		addPreferencesFromResource(R.xml.pref_general);
-//
-//		// Add 'notifications' preferences, and a corresponding header.
-//		PreferenceCategory fakeHeader = new PreferenceCategory(this);
-//		fakeHeader.setTitle(R.string.pref_header_server);
-//		getPreferenceScreen().addPreference(fakeHeader);
-//		addPreferencesFromResource(R.xml.pref_server);
-//		bindPreferenceSummaryToValue(findPreference("server_host_address"));
-//		bindPreferenceSummaryToValue(findPreference("server_host_port"));
-//
-//		fakeHeader = new PreferenceCategory(this);
-//		fakeHeader.setTitle(R.string.fName_DmxOut);
-//		getPreferenceScreen().addPreference(fakeHeader);
-//		addPreferencesFromResource(R.xml.pref_dmx_out_override);
-//		bindPreferenceSummaryToValue(findPreference("max_channel"));
-//		bindPreferenceSummaryToValue(findPreference("default_value"));
-//	}
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		
+		setupSimplePreferencesScreen();
+	}
 
-//	/** {@inheritDoc} */
-//	@Override
-//	public boolean onIsMultiPane() {
-//		return isXLargeTablet(this) && !isSimplePreferences(this);
-//	}
-//
-//	/**
-//	 * Helper method to determine if the device has an extra-large screen. For
-//	 * example, 10" tablets are extra-large.
-//	 */
-//	private static boolean isXLargeTablet(Context context) {
-//		return (context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
-//	}
-//
-//	/**
-//	 * Determines whether the simplified settings UI should be shown. This is
-//	 * true if this is forced via {@link #ALWAYS_SIMPLE_PREFS}, or the device
-//	 * doesn't have newer APIs like {@link PreferenceFragment}, or the device
-//	 * doesn't have an extra-large screen. In these cases, a single-pane
-//	 * "simplified" settings UI should be shown.
-//	 */
-//	private static boolean isSimplePreferences(Context context) {
-//		return ALWAYS_SIMPLE_PREFS
-//				|| Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB
-//				|| !isXLargeTablet(context);
-//	}
-//
+	/**
+	 * Shows the simplified settings UI if the device configuration if the
+	 * device configuration dictates that a simplified, single-pane UI should be
+	 * shown.
+	 */
+	private void setupSimplePreferencesScreen() {
+		if (!isSimplePreferences(this)) {
+			return;
+		}
+
+		// In the simplified UI, fragments are not used at all and we instead
+		// use the older PreferenceActivity APIs.
+
+		// Add 'general' preferences.
+		addPreferencesFromResource(R.xml.pref_general);
+
+		// Add 'notifications' preferences, and a corresponding header.
+		PreferenceCategory fakeHeader = new PreferenceCategory(this);
+		fakeHeader.setTitle(R.string.pref_header_server);
+		getPreferenceScreen().addPreference(fakeHeader);
+		addPreferencesFromResource(R.xml.pref_server);
+		bindPreferenceSummaryToValue(findPreference("server_host_address"));
+		bindPreferenceSummaryToValue(findPreference("server_host_port"));
+
+		fakeHeader = new PreferenceCategory(this);
+		fakeHeader.setTitle(R.string.fName_DmxOut);
+		getPreferenceScreen().addPreference(fakeHeader);
+		addPreferencesFromResource(R.xml.pref_dmx_out_override);
+		bindPreferenceSummaryToValue(findPreference("max_channel"));
+		bindPreferenceSummaryToValue(findPreference("default_value"));
+	}
+
 	/** {@inheritDoc} */
 	@Override
+	public boolean onIsMultiPane() {
+		return isXLargeTablet(this) && !isSimplePreferences(this);
+	}
+
+	/**
+	 * Helper method to determine if the device has an extra-large screen. For
+	 * example, 10" tablets are extra-large.
+	 */
+	private static boolean isXLargeTablet(Context context) {
+		return (context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
+	}
+
+	/**
+	 * Determines whether the simplified settings UI should be shown. This is
+	 * true if this is forced via {@link #ALWAYS_SIMPLE_PREFS}, or the device
+	 * doesn't have newer APIs like {@link PreferenceFragment}, or the device
+	 * doesn't have an extra-large screen. In these cases, a single-pane
+	 * "simplified" settings UI should be shown.
+	 */
+	private static boolean isSimplePreferences(Context context) {
+		return ALWAYS_SIMPLE_PREFS
+				|| Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB
+				|| !isXLargeTablet(context);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public void onBuildHeaders(List<Header> target) {
-		loadHeadersFromResource(R.xml.pref_headers, target);
+		if (!isSimplePreferences(this)) {
+			loadHeadersFromResource(R.xml.pref_headers, target);
+		}
 	}
 
 	/**
@@ -192,6 +195,7 @@ public class SettingsActivity extends PreferenceActivity {
 	 * This fragment shows general preferences only. It is used when the
 	 * activity is showing a two-pane settings UI.
 	 */
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public static class GeneralPreferenceFragment extends PreferenceFragment {
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
@@ -211,6 +215,7 @@ public class SettingsActivity extends PreferenceActivity {
 	 * This fragment shows general preferences only. It is used when the
 	 * activity is showing a two-pane settings UI.
 	 */
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public static class ServerPreferenceFragment extends PreferenceFragment {
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
@@ -230,10 +235,8 @@ public class SettingsActivity extends PreferenceActivity {
 	 * This fragment shows general preferences only. It is used when the
 	 * activity is showing a two-pane settings UI.
 	 */
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public static class DmxOutOverridePreferenceFragment extends PreferenceFragment {
-		public final static String MAX_CHANNEL = "dmx_out_override_max_channel";
-		public final static String DEFAULT_VALUE = "dmx_out_override_default_value";
-		
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
@@ -243,8 +246,8 @@ public class SettingsActivity extends PreferenceActivity {
 			// to their values. When their values change, their summaries are
 			// updated to reflect the new value, per the Android Design
 			// guidelines.
-			bindPreferenceSummaryToValue(findPreference(MAX_CHANNEL));
-			bindPreferenceSummaryToValue(findPreference(DEFAULT_VALUE));
+			bindPreferenceSummaryToValue(findPreference("max_channel"));
+			bindPreferenceSummaryToValue(findPreference("default_value"));
 		}
 	}
 }

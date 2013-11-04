@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.ljremote.android.data.DataManager.TABLES;
 import com.ljremote.android.data.Database.DMXOuts;
@@ -193,13 +194,16 @@ public class DMXOutManager extends AbstractDataManager {
 			@Override
 			protected Boolean doInBackground(Void... params) {
 				try {
+					Log.d("DMXOutManager", "sendDMXOveride");
 					return getClientProxy().overRideChannels(getAllDb());
 				} catch (LJNotFoundException e) {
 				} catch (Exception e) {
+					Log.e("DMXOutManager", "error :",e);
 				}
 				return false;
 			}
 		};
+		task.execute();
 		return true;
 	}
 }

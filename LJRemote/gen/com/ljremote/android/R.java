@@ -64,7 +64,7 @@ some parent container.
         public static final int LinearLayout01=0x7f050017;
         public static final int RelativeLayout1=0x7f050003;
         public static final int Space1=0x7f05002d;
-        public static final int add_dmx_out=0x7f05004a;
+        public static final int add_dmx_out=0x7f05004b;
         public static final int address=0x7f050043;
         public static final int bgcue_list=0x7f050007;
         public static final int bottom=0x7f05000a;
@@ -107,6 +107,7 @@ some parent container.
         public static final int label=0x7f050021;
         public static final int linearLayout1=0x7f050011;
         public static final int load_cue=0x7f050049;
+        public static final int load_cuelist=0x7f05004a;
         public static final int menu=0x7f050033;
         public static final int menu_black_out=0x7f050047;
         public static final int menu_change_mode=0x7f050048;
@@ -114,7 +115,7 @@ some parent container.
         public static final int menu_settings=0x7f050046;
         public static final int mstr_int_list=0x7f050034;
         public static final int ok_button=0x7f05000d;
-        public static final int refresh=0x7f05004b;
+        public static final int refresh=0x7f05004c;
         public static final int seek_int=0x7f050022;
         public static final int seek_intensity=0x7f05003b;
         public static final int seq_list=0x7f050037;
@@ -172,8 +173,9 @@ some parent container.
     public static final class menu {
         public static final int activity_main=0x7f0a0000;
         public static final int cue_context=0x7f0a0001;
-        public static final int dmx_out_fragment=0x7f0a0002;
-        public static final int ljfunction=0x7f0a0003;
+        public static final int cuelist_context=0x7f0a0002;
+        public static final int dmx_out_fragment=0x7f0a0003;
+        public static final int ljfunction=0x7f0a0004;
     }
     public static final class string {
         public static final int add_selected=0x7f07001d;
@@ -184,6 +186,7 @@ some parent container.
         public static final int connect=0x7f07000e;
         public static final int cuelists=0x7f070005;
         public static final int cues=0x7f070002;
+        public static final int default_value=0x7f070020;
         public static final int disconnect=0x7f07000f;
         public static final int dmx_out_add_dialog_title=0x7f07001c;
         public static final int drive=0x7f070010;
@@ -193,33 +196,35 @@ some parent container.
         public static final int hideExistingChannels=0x7f07001b;
         public static final int ljfunctions=0x7f070016;
         public static final int load_cue=0x7f070014;
+        public static final int load_cuelist=0x7f07001e;
+        public static final int max_channels=0x7f07001f;
         public static final int menu_settings=0x7f070008;
         public static final int menu_testjson=0x7f07000a;
         public static final int mstr_int=0x7f070004;
-        public static final int pref_auto_connect=0x7f07002e;
-        public static final int pref_default_display_name=0x7f070023;
-        public static final int pref_description_social_recommendations=0x7f070021;
+        public static final int pref_auto_connect=0x7f070031;
+        public static final int pref_default_display_name=0x7f070026;
+        public static final int pref_description_social_recommendations=0x7f070024;
         /**  Example settings for Data & Sync 
          */
-        public static final int pref_header_data_sync=0x7f070025;
+        public static final int pref_header_data_sync=0x7f070028;
         /**  Strings related to Settings 
  Example General settings 
          */
-        public static final int pref_header_general=0x7f07001f;
+        public static final int pref_header_general=0x7f070022;
         /**  Example settings for Notifications 
          */
-        public static final int pref_header_server=0x7f070028;
-        public static final int pref_ip_address=0x7f07002d;
-        public static final int pref_ringtone_silent=0x7f07002b;
-        public static final int pref_title_add_friends_to_messages=0x7f070024;
-        public static final int pref_title_display_name=0x7f070022;
-        public static final int pref_title_new_message_notifications=0x7f070029;
-        public static final int pref_title_port=0x7f07002f;
-        public static final int pref_title_ringtone=0x7f07002a;
-        public static final int pref_title_social_recommendations=0x7f070020;
-        public static final int pref_title_sync_frequency=0x7f070026;
-        public static final int pref_title_system_sync_settings=0x7f070027;
-        public static final int pref_title_vibrate=0x7f07002c;
+        public static final int pref_header_server=0x7f07002b;
+        public static final int pref_ip_address=0x7f070030;
+        public static final int pref_ringtone_silent=0x7f07002e;
+        public static final int pref_title_add_friends_to_messages=0x7f070027;
+        public static final int pref_title_display_name=0x7f070025;
+        public static final int pref_title_new_message_notifications=0x7f07002c;
+        public static final int pref_title_port=0x7f070032;
+        public static final int pref_title_ringtone=0x7f07002d;
+        public static final int pref_title_social_recommendations=0x7f070023;
+        public static final int pref_title_sync_frequency=0x7f070029;
+        public static final int pref_title_system_sync_settings=0x7f07002a;
+        public static final int pref_title_vibrate=0x7f07002f;
         public static final int sequences=0x7f070000;
         public static final int server_mode_bound=0x7f07000c;
         public static final int server_mode_driver=0x7f07000d;
@@ -227,7 +232,7 @@ some parent container.
         public static final int statics=0x7f070001;
         public static final int sync=0x7f070019;
         public static final int sync_short=0x7f07001a;
-        public static final int title_activity_settings=0x7f07001e;
+        public static final int title_activity_settings=0x7f070021;
         public static final int toggle=0x7f070009;
         public static final int undrive=0x7f070011;
         public static final int up_all=0x7f070012;
@@ -268,9 +273,10 @@ some parent container.
         public static final int StaticItem_SeekBar=0x7f090007;
     }
     public static final class xml {
-        public static final int pref_general=0x7f040000;
-        public static final int pref_headers=0x7f040001;
-        public static final int pref_server=0x7f040002;
+        public static final int pref_dmx_out_override=0x7f040000;
+        public static final int pref_general=0x7f040001;
+        public static final int pref_headers=0x7f040002;
+        public static final int pref_server=0x7f040003;
     }
     public static final class styleable {
         /** Attributes that can be used with a ServerConnectionStates.

@@ -19,7 +19,7 @@ import com.ljremote.json.model.Static;
 public class Database {
 	private static final String TAG = "Database";
 	private static final String DATABASE_NAME = "ljremote.db";
-	private static final int DATABASE_VERSION = 4;
+	private static final int DATABASE_VERSION = 5;
 
 	private static final String CREATE_TABLE_FORMAT = "CREATE TABLE %s (%s);";
 	private static final String DROP_TABLE_FORMAT = "DROP TABLE IF EXISTS %s";
@@ -50,6 +50,7 @@ public class Database {
 			createTable(db, LJFunctions.CREATE_TABLE);
 			createTable(db, LJFunctions.CREATE_GROUP_TABLE);
 			createTable(db, DMXOuts.CREATE_TABLE);
+			createTable(db, MasterInts.CREATE_TABLE);
 		}
 		
 		public void createTable(SQLiteDatabase db, String createSql){
@@ -70,6 +71,7 @@ public class Database {
 			db.execSQL(String.format(DROP_TABLE_FORMAT, LJFunctions.TABLE_NAME));
 			db.execSQL(String.format(DROP_TABLE_FORMAT, LJFunctions.GROUP_TABLE_NAME));
 			db.execSQL(String.format(DROP_TABLE_FORMAT, DMXOuts.TABLE_NAME));
+			db.execSQL(String.format(DROP_TABLE_FORMAT, MasterInts.TABLE_NAME));
 
 			onCreate(db);
 		}
@@ -680,7 +682,7 @@ public class Database {
 			int ret = openDB().update(TABLE_NAME, contentValues,
 					COL_ID + " = ?", new String[] { String.valueOf(id) });
 			closeDB();
-			Log.d(TAG, String.format("DMXOut %d updated: %s: %s, %s: %d, %s: %s", id,COL_VALUE,value));
+			Log.d(TAG, String.format("DMXOut %d updated: %s: %s", id,COL_VALUE,value));
 			return ret > 0;
 		}
 
@@ -707,6 +709,105 @@ public class Database {
 			DMXChannel channel = new DMXChannel();
 			channel.setChannel(c.getInt(NUM_COL_ID));
 			channel.setForce(c.getInt(NUM_COL_FORCE) > 0);
+			channel.setValue(c.getInt(NUM_COL_VALUE));
+			return channel;
+		}
+		@Override
+		public String getColKey() {
+			return COL_ID;
+		}
+	}
+	
+	public static final class MasterInts extends TableHelper<DMXChannel>{
+		static final String TABLE_NAME = "MSTR_ITN";
+
+		public static final String COL_ID = "_id";
+		public static final int NUM_COL_ID = 0;
+
+		public static final String COL_VALUE = "VALUE";
+		public static final int NUM_COL_VALUE = 1;
+
+		public static final String COL_ENABLE= "ENABLE";
+		public static final int NUM_COL_ENABLE = 2;
+
+		public static final String[] COLUMN_NAMES = {
+			COL_ID,COL_VALUE,COL_ENABLE
+		};
+		static final String CREATE_TABLE = String.format(CREATE_TABLE_FORMAT,
+				TABLE_NAME, COL_ID + " INTEGER PRIMARY KEY, "
+						+ COL_VALUE + " INTEGER, "
+						+ COL_ENABLE + " INTEGER");
+
+		private static final String SELECT_ALL = "SELECT * FROM " + TABLE_NAME;
+
+		public boolean insertOrUpdate (int id, int value) {
+			Cursor res = openDB().rawQuery(SELECT_ALL + " WHERE " + COL_ID + " = ? ", new String[]{ String.valueOf(id) });
+			if ( res != null && res.getCount() > 0 ) {
+				res.close();
+				return update(id, value, true);
+			} else {
+				return insert(id, value, true);
+			}
+		}
+		
+		public boolean insert(int id, int value, boolean enable) {
+			ContentValues contentValues = new ContentValues();
+			contentValues.put(COL_ID, id);
+			contentValues.put(COL_VALUE, value);
+			contentValues.put(COL_ENABLE, enable);
+			long ret = openDB().insert(TABLE_NAME, null, contentValues);
+			closeDB();
+			Log.d(TAG, String.format("DMXOut %d insered", id));
+			return ret != -1;
+		}
+
+		public boolean update(int id, int value, boolean enable) {
+			ContentValues contentValues = new ContentValues();
+			if (value >= 0)
+				contentValues.put(COL_VALUE, value);
+			contentValues.put(COL_ENABLE, enable);
+			int ret = openDB().update(TABLE_NAME, contentValues,
+					COL_ID + " = ?", new String[] { String.valueOf(id) });
+			closeDB();
+			Log.d(TAG, String.format("DMXOut %d updated: %s: %s, %s: %b", id,COL_VALUE,value,COL_ENABLE,enable));
+			return ret > 0;
+		}
+		
+
+		public boolean update(int id, int value) {
+			ContentValues contentValues = new ContentValues();
+			if (value >= 0)
+				contentValues.put(COL_VALUE, value);
+			int ret = openDB().update(TABLE_NAME, contentValues,
+					COL_ID + " = ?", new String[] { String.valueOf(id) });
+			closeDB();
+			Log.d(TAG, String.format("DMXOut %d updated: %s: %s", id,COL_VALUE,value));
+			return ret > 0;
+		}
+
+//		public boolean force(int id, boolean force) {
+//			return update(id, -1, force);
+//		}
+
+		public boolean setValue(int id, int value) {
+			return update(id, value);
+		}
+
+		public Cursor getCursor(){
+			Cursor c = readDB().rawQuery(SELECT_ALL, null);
+			return c;
+		}
+		
+		@Override
+		public String getTableName() {
+			return TABLE_NAME;
+		}
+
+		@Override
+		public DMXChannel getDataFromCursor(Cursor c) {
+			DMXChannel channel = new DMXChannel();
+			channel.setChannel(c.getInt(NUM_COL_ID));
+			channel.setForce(c.getInt(NUM_COL_ENABLE) > 0);
 			channel.setValue(c.getInt(NUM_COL_VALUE));
 			return channel;
 		}
@@ -746,6 +847,10 @@ public class Database {
 	
 	public DMXOuts dmxOuts() {
 		return new DMXOuts();
+	}
+	
+	public MasterInts masterInts() {
+		return new MasterInts();
 	}
 	
 	public static SQLiteDatabase openDB() {

@@ -86,7 +86,7 @@ public class TabbedLJFunctionFragment extends AbstractTabbedDetailFragment imple
 			switch (item.getItemId()) {
 			case R.id.refresh:
 				((LJFunctionManager) getDataManager()).refreshData();
-//				setRefreshActionButtonState(true);
+				setRefreshActionButtonState(true);
 				break;
 			default:
 				break;
@@ -114,13 +114,13 @@ public class TabbedLJFunctionFragment extends AbstractTabbedDetailFragment imple
 	@Override
 	public void onTableUpdateListener(Context context, TABLES table) {
 		if( table == TABLES.LJFUNCTIONS ) {
-//			setRefreshActionButtonState(false);
+			setRefreshActionButtonState(false);
 			fillTabHost();
 		}
 	}
 
 	public void setRefreshActionButtonState(final boolean refreshing) {
-	    if (optionsMenu != null) {
+	    if (isResumed() && optionsMenu != null) {
 	        final MenuItem refreshItem = optionsMenu
 	            .findItem(R.id.refresh);
 	        if (refreshItem != null) {

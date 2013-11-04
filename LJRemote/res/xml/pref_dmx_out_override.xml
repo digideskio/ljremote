@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" android:title="@string/fName_DmxOut">
+    
+	<EditTextPreference android:title="@string/max_channels" android:key="dmx_out_override_max_channel" android:defaultValue="512"/>
+	<EditTextPreference android:title="@string/default_value" android:key="dmx_out_override_default_value" android:defaultValue="255"/>
+</PreferenceScreen>

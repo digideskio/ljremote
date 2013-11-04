@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.util.SparseBooleanArray;
@@ -19,6 +21,7 @@ import android.widget.GridView;
 import android.widget.Switch;
 
 import com.ljremote.android.R;
+import com.ljremote.android.SettingsActivity;
 import com.ljremote.android.util.NumberUtils;
 
 public class ChannelChooserFragment extends DialogFragment implements
@@ -31,10 +34,12 @@ public class ChannelChooserFragment extends DialogFragment implements
 
 	public interface ChannelChooserDialogListener {
 		public List<Integer> getExistingChannels();
+
 		public void onFinishChosingChannel(List<Integer> chosenChannels);
 	}
-	
-	public static ChannelChooserFragment newInstance(int title, ChannelChooserDialogListener listener) {
+
+	public static ChannelChooserFragment newInstance(int title,
+			ChannelChooserDialogListener listener) {
 		ChannelChooserFragment dialog = new ChannelChooserFragment();
 		Bundle args = new Bundle();
 		args.putInt("title", title);
@@ -59,11 +64,13 @@ public class ChannelChooserFragment extends DialogFragment implements
 		Switch hideSwitch = (Switch) mainView.findViewById(R.id.hideSwitch);
 		hideSwitch.setOnClickListener(this);
 		attachGridAdapter(hideSwitch.isChecked());
-		
+
 		getDialog().setTitle(getArguments().getInt("title"));
-		
-		((Button) mainView.findViewById(R.id.ok_button)).setOnClickListener(this);
-		((Button) mainView.findViewById(R.id.cancel_button)).setOnClickListener(this);
+
+		((Button) mainView.findViewById(R.id.ok_button))
+				.setOnClickListener(this);
+		((Button) mainView.findViewById(R.id.cancel_button))
+				.setOnClickListener(this);
 		return mainView;
 	}
 
@@ -85,7 +92,9 @@ public class ChannelChooserFragment extends DialogFragment implements
 	}
 
 	public void attachGridAdapter(boolean hideExisting) {
-		int size = 50;
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		String strSize = prefs.getString(SettingsActivity.DmxOutOverridePreferenceFragment.MAX_CHANNEL, "512");
+		int size = Integer.parseInt(strSize);
 
 		List<Integer> chosenChannels = getChosenChannels();
 
@@ -104,14 +113,14 @@ public class ChannelChooserFragment extends DialogFragment implements
 	}
 
 	public List<Integer> getExistingChannels() {
-		if ( listener != null ) {
+		if (listener != null) {
 			return listener.getExistingChannels();
 		} else {
 			return new ArrayList<Integer>();
 		}
 
 	}
-	
+
 	@Override
 	public void onDismiss(DialogInterface dialog) {
 		super.onDismiss(dialog);
@@ -152,7 +161,7 @@ public class ChannelChooserFragment extends DialogFragment implements
 			break;
 		case R.id.ok_button:
 			List<Integer> choices = getChosenChannels();
-			if( hideExisting ) {
+			if (hideExisting) {
 				choices.addAll(existingChannels);
 			}
 			listener.onFinishChosingChannel(choices);

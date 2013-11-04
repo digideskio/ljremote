@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,9 +20,12 @@ import com.ljremote.json.model.LJFunction;
 import com.ljremote.json.model.Seq;
 import com.ljremote.json.model.Static;
 import com.ljremote.server.driver.LJDriver.MyUserLib.ExternalDMXOverride;
+import com.ljremote.server.driver.LJDriver.MyUserLib.MasterIntensitySettings;
+import com.ljremote.server.driver.LJDriver.MyUserLib.StaticItem;
 import com.ljremote.server.driver.User32Ex.COPYDATASTRUCT;
 import com.ljremote.server.driver.Win32CopyDataMonitor.OnDataReceiver;
 import com.sun.jna.NativeLong;
+import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import com.sun.jna.platform.win32.BaseTSD.ULONG_PTR;
@@ -41,8 +47,7 @@ public class LJDriver implements OnDataReceiver {
 		final static int Reverse = 48; // lParam = [0..11]
 		final static int Random = 49; // lParam = [0..11]
 		final static int Bounce = 78; // lParam = [0..11]
-		
-		
+
 	}
 
 	final static class LJMain {
@@ -89,7 +94,7 @@ public class LJDriver implements OnDataReceiver {
 		final static int UMSG = WM_USER + 1001;
 		final static int CLEAR = -1;
 		final static int CUE_LIST_ITEM_SIZE = 39;
-		
+
 		final static int CUELIST_CONTROL_UMSG = WM_USER + 137;
 		final static int CUELIST_CONTROL_GO = 32;
 		final static int CUELIST_CONTROL_BACK = 33;
@@ -118,28 +123,31 @@ public class LJDriver implements OnDataReceiver {
 					+ Integer.toHexString(flags) + ", Name : " + name);
 			return new CueList(no, name);
 		}
-		
-		public int getCurrentCueList(){
+
+		public int getCurrentCueList() {
 			checkLJ();
 			return User32Ex.INSTANCE.SendMessageA(LJHandle,
 					ExternalConfiguration.UMSG,
 					ExternalConfiguration.RequestCurrentCueList, 1).intValue();
 		}
-		
-		public boolean loadCueList(int id){
+
+		public boolean loadCueList(int id) {
 			checkLJ();
 			log.trace(User32Ex.INSTANCE.SendMessageA(LJHandle, UMSG, id, 1));
 			return true;
 		}
 
-		public boolean cueListGo(){
+		public boolean cueListGo() {
 			checkLJ();
-			log.trace(User32Ex.INSTANCE.SendMessageA(LJHandle, CUELIST_CONTROL_UMSG, CUELIST_CONTROL_GO, 1));
+			log.trace(User32Ex.INSTANCE.SendMessageA(LJHandle,
+					CUELIST_CONTROL_UMSG, CUELIST_CONTROL_GO, 1));
 			return true;
 		}
-		public boolean cueListBack(){
+
+		public boolean cueListBack() {
 			checkLJ();
-			log.trace(User32Ex.INSTANCE.SendMessageA(LJHandle, CUELIST_CONTROL_UMSG, CUELIST_CONTROL_BACK, 1));
+			log.trace(User32Ex.INSTANCE.SendMessageA(LJHandle,
+					CUELIST_CONTROL_UMSG, CUELIST_CONTROL_BACK, 1));
 			return true;
 		}
 	}
@@ -213,8 +221,8 @@ public class LJDriver implements OnDataReceiver {
 					+ Integer.toHexString(flags) + ", Name : " + name);
 			return new Seq(no, name);
 		}
-		
-		public int getCurrentSeq(){
+
+		public int getCurrentSeq() {
 			checkLJ();
 			return User32Ex.INSTANCE.SendMessageA(LJHandle,
 					ExternalConfiguration.UMSG,
@@ -303,16 +311,17 @@ public class LJDriver implements OnDataReceiver {
 			return STATIC_ITEM_SIZE;
 		}
 	}
-	
-	public final class LJFunctions extends CopyDataProcessor<LJFunction>{
+
+	public final class LJFunctions extends CopyDataProcessor<LJFunction> {
 		final static int UMSG = WM_USER + 1006;
-		
+
 		public boolean executeFunction(int id) {
 			checkLJ();
 			log.trace("Executing LJ function " + id);
-			return User32Ex.INSTANCE.SendMessageA(LJHandle, UMSG, id, 0).intValue() == 0;
+			return User32Ex.INSTANCE.SendMessageA(LJHandle, UMSG, id, 0)
+					.intValue() == 0;
 		}
-		
+
 		@Override
 		public int getDataSize() {
 			return 40;
@@ -322,7 +331,7 @@ public class LJDriver implements OnDataReceiver {
 			checkLJ();
 			return getDataList(ExternalConfiguration.RequestFunctionList);
 		}
-		
+
 		@Override
 		public LJFunction readData(Pointer p, int offset) {
 			int no = p.getInt(offset);
@@ -331,7 +340,7 @@ public class LJDriver implements OnDataReceiver {
 			log.trace(func);
 			return func;
 		}
-		
+
 	}
 
 	private abstract class CopyDataProcessor<T> {
@@ -474,9 +483,13 @@ public class LJDriver implements OnDataReceiver {
 				}
 			}
 
-			public int[] Reserved = new int[15];
+			public int[] Reserved = new int[16];
 			public byte[] ChFlags = new byte[DMXOutOveride.NB_CHANEL];
 			public byte[] Values = new byte[DMXOutOveride.NB_CHANEL];
+
+			public ExternalDMXOverride() {
+				super(ALIGN_NONE);
+			}
 
 			@Override
 			protected List<String> getFieldOrder() {
@@ -485,31 +498,231 @@ public class LJDriver implements OnDataReceiver {
 			}
 
 		}
+
+		class MasterIntensitySettings extends Structure {
+			static class ByReference extends MasterIntensitySettings implements
+					Structure.ByReference {
+
+				public ByReference() {
+					super();
+				}
+			}
+
+			public MasterIntensitySettings() {
+				super();
+				this.setAlignType(ALIGN_NONE);
+			}
+
+			public byte[] Flags = new byte[MasterIntensity.COUNT];
+			public byte[] Values = new byte[MasterIntensity.COUNT];
+
+			@Override
+			protected List<String> getFieldOrder() {
+				return Arrays.asList(new String[] { "Flags", "Values" });
+			}
+			
+			@Override
+			public String toString() {
+				return String.format("MasterIntensity:\n\tFlags: %s\n\tValues: %s",
+						Arrays.toString(Flags),
+						Arrays.toString(Values)
+						);
+			}
+		}
+
+		class StaticItem extends Structure {
+			static class ByReference extends MasterIntensitySettings implements
+					Structure.ByReference {
+
+				public ByReference() {
+					super();
+				}
+			}
+
+			public int No;
+			public int Flags;
+			public PascalString.ByValue Name = new PascalString.ByValue(30);
+
+			public StaticItem() {
+				super();
+				this.setAlignType(ALIGN_NONE);
+			}
+			
+			@Override
+			protected List<String> getFieldOrder() {
+				return Arrays.asList(new String[] { "No", "Flags", "Name" });
+			}
+			
+			public void setName(String name){
+				this.Name.setString(name);
+			}
+		}
+		
+		public class PascalString extends Structure {
+			
+			static final int DEFAULT_SIZE = 32;
+			
+			public static class ByReference extends PascalString implements
+				Structure.ByReference {
+
+				public ByReference() {
+					super();
+				}
+				
+				public ByReference(int size) {
+					super(size);
+				}
+			}
+			public static class ByValue extends PascalString implements Structure.ByValue {
+				
+				public ByValue() {
+					super();
+				}
+				
+				public ByValue(int size) {
+					super(size);
+				}
+			}
+			
+			public byte length;
+			public char[] str = new char[DEFAULT_SIZE];
+			
+			public PascalString() {
+				super(ALIGN_NONE);
+			}
+			
+			public PascalString(int size) {
+				this();
+				str = new char[size];
+			}
+			
+			public void setString(String str) {
+				this.length = (byte) str.length();
+				this.str    = str.toCharArray();
+			}
+
+			@Override
+			public String toString() {
+				return new String(str);
+			}
+			
+			@Override
+			protected List<String> getFieldOrder() {
+				return Arrays.asList(new String[] { "length", "str" });
+			}
+			
+		}
+		
 	}
 
-	public final class DMXOutOveride {
+	public final class DMXOutOveride implements Runnable {
 		final static int NB_CHANEL = 2048;
 		final static byte OVERRIDE = 1;
 		int _WMCOPY_DMXOverride = 267;
+		COPYDATASTRUCT copy_data = null;
+		ExternalDMXOverride data = null;
+		ScheduledExecutorService sender;
 
-		public int override(Map<Integer, Integer> channels){
-			ExternalDMXOverride data = new ExternalDMXOverride();
-			for( int can : channels.keySet() ) {
-				data.ChFlags[can] = OVERRIDE;
-				data.Values[can] = channels.get(can).byteValue();
+		public int override(Map<Integer, Integer> channels) {
+			log.debug("Overriding Datas : " + channels);
+			if (channels.size() == 0) {
+				copy_data = null;
+			} else {
+				data = new ExternalDMXOverride();
+				for( int i =0; i < NB_CHANEL ; i++ ) {
+					data.ChFlags[i] = 0;
+					data.Values[i] = 0;
+				}
+				for (int can : channels.keySet()) {
+					data.ChFlags[can] = OVERRIDE;
+					data.Values[can] = channels.get(can).byteValue();
+				}
+				data.write();
+				copy_data = new COPYDATASTRUCT();
+				copy_data.dwData = new ULONG_PTR(_WMCOPY_DMXOverride);
+				copy_data.cbData = new DWORD(data.size());
+				copy_data.lpData = data.getPointer();
+				copy_data.write();
 			}
-			return sendData(data);
+
+			// return 0;
+			return startStopSendingData();
 		}
-		
-		private int sendData(ExternalDMXOverride data) {
-			COPYDATASTRUCT copy_data = new COPYDATASTRUCT();
-			copy_data.dwData = new ULONG_PTR(_WMCOPY_DMXOverride);
-			copy_data.cbData = new DWORD(data.size());
-			copy_data.lpData = data.getPointer();
-			NativeLong ret = MyUserLib.INSTANCE.SendMessageA(LJHandle,
-					new NativeLong(MyUserLib.WM_COPYDATA),
-					datamonitor.getViewer(), copy_data.getPointer());
-			return ret.intValue();
+
+		private int startStopSendingData() {
+			if (copy_data == null) {
+				stopSendingData();
+			} else {
+				startSendingData();
+			}
+			return 0;
+		}
+
+		public void startSendingData() {
+			if (sender != null && !sender.isShutdown()) {
+				return;
+			}
+			sender = Executors.newSingleThreadScheduledExecutor();
+			sender.scheduleAtFixedRate(this, 50, 50, TimeUnit.MILLISECONDS);
+			log.info("Start sending DMXOUT data");
+		}
+
+		public void stopSendingData() {
+			if (sender == null || sender.isShutdown()) {
+				return;
+			}
+			sender.shutdownNow();
+			try {
+				sender.awaitTermination(150, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				log.error("Error while stopping DMXOUT data sender", e);
+			}
+			log.info("Sending DMXOUT data stopped");
+		}
+
+		public void run() {
+			if (copy_data == null) {
+				return;
+			}
+			boolean ret = MyUserLib.INSTANCE.SendMessageA(LJHandle,
+					MyUserLib.WM_COPYDATA, datamonitor.getViewer(),
+					copy_data.getPointer());
+			System.out.println(ret);
+		}
+	}
+
+	public final class MasterIntensity {
+		public static final int COUNT = 9;
+		final static byte OVERRIDE = 1;
+		int _WMCOPY_SetIntensityMasters = 266;
+		COPYDATASTRUCT copy_data = null;
+		MasterIntensitySettings settings = null;
+
+		public boolean setIntensity(int pos, int intensity) {
+			if (settings == null) {
+				settings = new MasterIntensitySettings();
+			}
+			;
+			if (copy_data == null) {
+				copy_data = new COPYDATASTRUCT();
+				copy_data.dwData = new ULONG_PTR(_WMCOPY_SetIntensityMasters);
+				copy_data.cbData = new DWORD(settings.size());
+				copy_data.lpData = settings.getPointer();
+			}
+
+			settings.Flags[pos] = OVERRIDE;
+			settings.Values[pos] = (byte) intensity;
+			
+			log.debug("Settings Master Intensity : " + settings);
+
+			settings.write();
+			copy_data.write();
+
+			boolean ret = MyUserLib.INSTANCE.SendMessageA(LJHandle,
+					MyUserLib.WM_COPYDATA, datamonitor.getViewer(),
+					copy_data.getPointer());
+			System.out.println(ret);
+			return ret;
 		}
 	}
 
@@ -524,11 +737,28 @@ public class LJDriver implements OnDataReceiver {
 	private Control control;
 	private LJFunctions ljFunctions;
 	private DMXOutOveride dmxOutOverride;
+	private MasterIntensity masterInt;
 
 	public LJDriver() {
 		datamonitor = new Win32CopyDataMonitor();
 		datamonitor.registerOnDataReceiver(this);
 		datamonitor.start();
+
+		if (Platform.is64Bit()) {
+			log.info("Plateform is 64bit");
+		} else {
+			log.info("Plateform is 32bit");
+		}
+		
+//		StaticItem item = new StaticItem();
+//		StaticItem[] items = (StaticItem[]) item.toArray(4);
+//		for(int i=0;i<4;i++){
+//			items[i].No = i;
+//			items[i].Flags = 10 + i;
+//			items[i].setName("Name_" + i);
+//			items[i].write();
+//		}
+//		System.out.println(items);
 	}
 
 	public boolean findLJ() {
@@ -592,11 +822,18 @@ public class LJDriver implements OnDataReceiver {
 	}
 
 	public LJFunctions ljFunctions() {
-		return ljFunctions == null ? ljFunctions = new LJFunctions() : ljFunctions;
+		return ljFunctions == null ? ljFunctions = new LJFunctions()
+				: ljFunctions;
+	}
+
+	public DMXOutOveride dmxOutOverride() {
+		return dmxOutOverride == null ? dmxOutOverride = new DMXOutOveride()
+				: dmxOutOverride;
 	}
 	
-	public DMXOutOveride dmxOutOverride() {
-		return dmxOutOverride == null ? dmxOutOverride = new DMXOutOveride() : dmxOutOverride;
+	public MasterIntensity masterInt() {
+		return masterInt == null ? masterInt = new MasterIntensity()
+		: masterInt;
 	}
 
 	public void onDataReceived(COPYDATASTRUCT copy_data) {
@@ -624,10 +861,14 @@ public class LJDriver implements OnDataReceiver {
 		}
 		copy_data.clear();
 	}
-	
 
-	public int sendMessageToLj(int uMsg, int wParam, int lParam){
+	public int sendMessageToLj(int uMsg, int wParam, int lParam) {
 		checkLJ();
-		return User32Ex.INSTANCE.SendMessageA(LJHandle, uMsg, wParam, lParam).intValue();
+		return User32Ex.INSTANCE.SendMessageA(LJHandle, uMsg, wParam, lParam)
+				.intValue();
+	}
+
+	public void stopActions() {
+		dmxOutOverride().stopSendingData();
 	}
 }

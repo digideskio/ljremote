@@ -4,13 +4,17 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.sun.jna.Callback;
+import com.sun.jna.LastErrorException;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import com.sun.jna.WString;
 import com.sun.jna.platform.win32.BaseTSD.ULONG_PTR;
+import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
+import com.sun.jna.platform.win32.WinUser.MSG;
+import com.sun.jna.ptr.NativeLongByReference;
 
 public interface User32Ex extends com.sun.jna.platform.win32.User32 {
 	User32Ex INSTANCE = (User32Ex) Native.loadLibrary("user32", User32Ex.class);
@@ -35,12 +39,16 @@ public interface User32Ex extends com.sun.jna.platform.win32.User32 {
 	final int QS_ALLINPUT = (QS_INPUT | QS_POSTMESSAGE | QS_TIMER | QS_PAINT
 			| QS_HOTKEY | QS_SENDMESSAGE);
 
+	final NativeLong ZERO = new NativeLong(0);
+	
 	HWND CreateWindowEx(int styleEx, String classname, String windowName,
 			int style, int x, int y, int width, int height, HWND hndParent,
 			int hndMenu, int hndInst, Object parm);
 
 	boolean DestroyWindow(HWND hwnd);
 
+//	NativeLong MsgWaitForMultipleObjects(NativeLong nCount, HANDLE[] pHandles,
+//			boolean bWaitAll, NativeLong dwMilliseconds, NativeLong dwWakeMask);
 	int MsgWaitForMultipleObjects(int nCount, HANDLE[] pHandles,
 			boolean bWaitAll, int dwMilliseconds, int dwWakeMask);
 
@@ -100,11 +108,16 @@ public interface User32Ex extends com.sun.jna.platform.win32.User32 {
      * @param   nIndex      The zero-based offset to the value to be set.
      * @param   callback    The callback function for the value to be set.
      */
-    public int SetWindowLongA(HWND hWnd, int nIndex, Callback callback);
+    public NativeLong SetWindowLongA(HWND hWnd, NativeLong nIndex, Callback callback) throws LastErrorException;
+    public NativeLongByReference SetWindowLongPtr(HWND hWnd, NativeLong nIndex, Callback callback) throws LastErrorException;
+    public Callback GetWindowLongA(HWND hWnd, int nIndex);
+//    public NativeLong GetWindowLongA(HWND hWnd, NativeLong nIndex);
 	
 	LRESULT SendMessageA(HWND hwnd, int umsg, int wParam, int lParam);
 	LRESULT SendMessageA(HWND lJHandle, int umsg, int wParam,
 			Pointer pointer);
+//	LRESULT SendMessageA(HWND lJHandle, int wmCopydata, HWND viewer, Pointer pointer);
+	boolean SendMessageA(HWND lJHandle, int wmCopydata, HWND viewer, Pointer pointer);
 
 	void PostMessageA(HWND hwnd, int umsg, int wParam, int lParam);
 
@@ -139,5 +152,12 @@ public interface User32Ex extends com.sun.jna.platform.win32.User32 {
 
 	NativeLong SendMessageA(HWND lJHandle, NativeLong wmCopydata, HWND viewer,
 			Pointer pointer);
+
+	boolean PeekMessageA(MSG msg, HWND hWnd, NativeLong i, NativeLong j, NativeLong pmRemove);
+
+	boolean TranslateMessageA(MSG msg);
+
+	LRESULT DispatchMessageA(MSG msg);
+
 
 }

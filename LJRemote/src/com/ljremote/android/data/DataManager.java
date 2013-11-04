@@ -24,6 +24,7 @@ public class DataManager {
 	private SequenceManager seqManager;
 	private LJFunctionManager lJFunctionManager;
 	private DMXOutManager dmxOutManager;
+	private MasterIntManager masterIntManager;
 	
 	public interface OnDatabaseUpdateListener {
 		public void onTableUpdateListener(Context context, TABLES table);
@@ -40,7 +41,7 @@ public class DataManager {
 	}
 	
 	public enum TABLES{
-		STATICS,SEQUENCES,CUES, CUELISTS, BGCUES, LJFUNCTIONS, DMXOUT
+		STATICS,SEQUENCES,CUES, CUELISTS, BGCUES, LJFUNCTIONS, DMXOUT, MASTER_INT
 	}
 	
 	public DataManager(Context context) {
@@ -85,6 +86,10 @@ public class DataManager {
 
 	public DMXOutManager getDMXOutManager() {
 		return dmxOutManager = dmxOutManager == null ? dmxOutManager = new DMXOutManager(this) : dmxOutManager;
+	}
+
+	public MasterIntManager getMasterIntManager() {
+		return masterIntManager = masterIntManager == null ? masterIntManager = new MasterIntManager(this) : masterIntManager;
 	}
 	
 	public LJClientService getService() {

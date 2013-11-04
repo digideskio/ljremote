@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ljremote</groupId>
 	<artifactId>server</artifactId>
-	<version>0.1.7</version>
+	<version>0.2.0</version>
 	<name>LJRemote Server</name>
 	<dependencies>
 		<dependency>
@@ -20,7 +20,7 @@
 		<dependency>
 			<groupId>com.ljremote</groupId>
 			<artifactId>json-rpc</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.portlet</groupId>

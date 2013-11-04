@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.ljremote.server.driver.User32Ex.COPYDATASTRUCT;
 import com.sun.jna.Callback;
+import com.sun.jna.LastErrorException;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Kernel32;
@@ -78,16 +79,24 @@ public class Win32CopyDataMonitor {
 
 		public void run() {
 			log.info("Run ReceverWindow");
+			createWindow();
 			for ( int nb_try = 0; viewer == null && nb_try < RETRY; nb_try++) {
 				viewer = User32Ex.INSTANCE.FindWindowA("SunAwtFrame", WINDOW_NAME);
-				if ( viewer == null ) {
-					createWindow();
-					viewer = User32Ex.INSTANCE.FindWindowA("SunAwtFrame", "CDM receiver");
-					wcmFrame.setVisible(false);
-				}
 			}
+			wcmFrame.setVisible(false);
 			log.debug("View : " + String.valueOf(viewer));
-			User32Ex.INSTANCE.SetWindowLongA(viewer, User32Ex.GWLP_WNDPROC, this);
+			NativeLong ret = null;
+			try {
+				ret = User32Ex.INSTANCE.SetWindowLongA(viewer, new NativeLong(User32Ex.GWLP_WNDPROC), this);
+			} catch (LastErrorException e) {
+				log.error("Windows error code : ",e);
+			} catch (Exception e) {
+				log.error("???????? error code : ",e);
+			}
+			
+			log.debug(ret);
+			log.debug(User32Ex.INSTANCE.GetWindowLongA(viewer, User32Ex.GWLP_WNDPROC));
+			log.debug(this);
 			
 			MSG msg = new MSG();
 			final HANDLE handles[] = { event };
@@ -95,7 +104,7 @@ public class Win32CopyDataMonitor {
 				int result = User32Ex.INSTANCE.MsgWaitForMultipleObjects(
 						handles.length, handles, false, Kernel32.INFINITE,
 						User32Ex.QS_ALLINPUT);
-				
+				log.error("res : " + result);
 				if(result == Kernel32.WAIT_OBJECT_0){
 					return;
 				}

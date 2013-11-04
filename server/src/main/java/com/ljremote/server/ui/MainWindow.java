@@ -5,8 +5,15 @@ import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.InvalidPreferencesFormatException;
+import java.util.prefs.Preferences;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -17,6 +24,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -49,10 +57,14 @@ import com.ljremote.json.services.CueListService;
 import com.ljremote.json.services.CueListServiceImpl;
 import com.ljremote.json.services.CueService;
 import com.ljremote.json.services.CueServiceImpl;
+import com.ljremote.json.services.DMXOutOverrideService;
+import com.ljremote.json.services.DMXOutOverrideServiceImpl;
 import com.ljremote.json.services.DriverService;
 import com.ljremote.json.services.DriverServiceImpl;
 import com.ljremote.json.services.LJFunctionService;
 import com.ljremote.json.services.LJFunctionServiceImpl;
+import com.ljremote.json.services.MasterIntService;
+import com.ljremote.json.services.MasterIntServiceImpl;
 import com.ljremote.json.services.SequenceService;
 import com.ljremote.json.services.SequenceServiceImpl;
 import com.ljremote.json.services.ServerService;
@@ -88,6 +100,33 @@ public class MainWindow implements OnServerStatusChangeListener,
 	private Options options;
 	private boolean debug = false;
 	private JTextField portField;
+	
+	/*--- CONSTANTS -----------------*/
+	/** Application name */
+	public final static String APP_NAME = "LJRemoteServer";
+
+	/*--- PREFERENCES ---------------*/
+	/** Root node for the package */
+	public final static String PREFS_NODE = "com/ljremote/server/ljRemoteServer";
+
+//	/** System Preferences for the application */
+//	private static Preferences globalPrefs = Preferences.systemRoot().node(
+//			PREFS_NODE);
+
+	/** User Preferences for the application */
+	private static Preferences userPrefs = Preferences.userRoot().node(
+			PREFS_NODE);
+
+	/*--- FILES -----------------*/
+	/** Global preferences file name */
+	private final static String GLOBAL_PREFS_FILE = "global.xml";
+	/** User preferences file name */
+	private final static String USER_PREFS_FILE = "user.xml";
+	
+	private static final String SERVER_PORT = "server/port";
+	private static final int SERVER_PORT_DEFAULT = 2508;
+	private static final String SERVER_MAX_CLIENTS = "server/max_clients";
+	private static final int SERVER_MAX_CLIENTS_DEFAULT = 5;
 
 	/**
 	 * Launch the application.
@@ -96,8 +135,7 @@ public class MainWindow implements OnServerStatusChangeListener,
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					MainWindow window = new MainWindow();
-					window.setAguments(args);
+					MainWindow window = new MainWindow(args);
 					window.frmLjServer.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -121,7 +159,9 @@ public class MainWindow implements OnServerStatusChangeListener,
 	/**
 	 * Create the application.
 	 */
-	public MainWindow() {
+	public MainWindow(String[] args) {
+		setAguments(args);
+		importPreferences();
 		initialize();
 	}
 
@@ -342,7 +382,7 @@ public class MainWindow implements OnServerStatusChangeListener,
 
 		portField = new JTextField();
 		portField.setToolTipText("Enter server port");
-		portField.setText("2508");
+		portField.setText(String.valueOf(getGlobalPrefs().getInt(SERVER_PORT, SERVER_PORT_DEFAULT)));
 		portField.setColumns(10);
 		GroupLayout gl_panel_7 = new GroupLayout(panel_7);
 		gl_panel_7.setHorizontalGroup(gl_panel_7.createParallelGroup(
@@ -570,12 +610,32 @@ public class MainWindow implements OnServerStatusChangeListener,
 		if (value != null) {
 			try {
 				int port = Integer.parseInt(value);
-
-				// restartServer = true;
+				getGlobalPrefs().put(SERVER_PORT, value);
+				exportPreferences();
+				restartServer = true;
 			} catch (NumberFormatException e) {
 
 			}
 
+		}
+		if (restartServer && server != null && server.isStarted() && clientNumberInt > 0 ) {
+			switch (JOptionPane
+					.showConfirmDialog(
+							frmLjServer,
+							String.format("%d clients are still connected are you sure you want to restart server now ?",
+									clientNumberInt),
+							"Restart Server",
+							JOptionPane.YES_NO_OPTION,
+							JOptionPane.WARNING_MESSAGE,null
+							)
+					) {
+			case JOptionPane.NO_OPTION:
+				restartServer = false;
+				break;
+			case JOptionPane.YES_OPTION:
+			default:
+				break;
+			}
 		}
 		if (restartServer) {
 			stopServer();
@@ -604,18 +664,22 @@ public class MainWindow implements OnServerStatusChangeListener,
 								new BGCueServiceImpl(driver),
 								new CueListServiceImpl(driver),
 								new ControlServiceImpl(driver),
-								new LJFunctionServiceImpl(driver), },
+								new LJFunctionServiceImpl(driver),
+								new DMXOutOverrideServiceImpl(driver),
+								new MasterIntServiceImpl(driver),
+								},
 						new Class<?>[] { ServerService.class,
 								DriverService.class, StaticService.class,
 								CueService.class, SequenceService.class,
 								BGCueService.class, CueListService.class,
-								ControlService.class, LJFunctionService.class, },
+								ControlService.class, LJFunctionService.class, DMXOutOverrideService.class,
+								MasterIntService.class},
 						true));
 
 		jsonRpcServer.setErrorResolver(new LJNotFoundException()
 				.getErrorResolver());
-		int maxThreads = 5;
-		int port = 2508;
+		int maxThreads = getGlobalPrefs().getInt(SERVER_MAX_CLIENTS, SERVER_MAX_CLIENTS_DEFAULT);
+		int port = getGlobalPrefs().getInt(SERVER_PORT, SERVER_PORT_DEFAULT);
 		clientNumberInt = 0;
 		try {
 			server = new LJServer(clientManager, jsonRpcServer, maxThreads,
@@ -631,6 +695,7 @@ public class MainWindow implements OnServerStatusChangeListener,
 	protected void stopServer() {
 		if (server != null && server.isStarted()) {
 			try {
+				driver.stopActions();
 				server.stop();
 			} catch (InterruptedException e) {
 				log.error(e);
@@ -688,5 +753,185 @@ public class MainWindow implements OnServerStatusChangeListener,
 		default:
 			break;
 		}
+	}
+	
+	/**
+	 * Get the global application preferences
+	 * 
+	 * @return global application preferences
+	 */
+	public Preferences getGlobalPrefs() {
+		return userPrefs;
+	}
+
+	/**
+	 * Get the user application preferences
+	 * 
+	 * @return user application preferences
+	 */
+	public Preferences getUserPrefs() {
+		return userPrefs;
+	}
+	
+	/**
+	 * Restore global preferences to default values
+	 * 
+	 */
+	private void restoreDefaultPreferences() {
+		log.info("Restoring default preferences");
+		applyPreferences();
+	}
+	
+	/**
+	 * Update application variables from preferences
+	 * 
+	 */
+	private void applyPreferences() {
+	}
+	
+	/**
+	 * Import preferences from defined files
+	 * 
+	 */
+	private void importPreferences() {
+		log.info("Checking Preferences Files");
+		boolean imported = false;
+		FileInputStream input = null;
+
+//		// Importing global preferences
+//		try {
+//			input = new FileInputStream(new File(GLOBAL_PREFS_FILE));
+//			Preferences.importPreferences(input);
+//			imported = true;
+//			log.info("Global preferences file  \"" + GLOBAL_PREFS_FILE
+//					+ "\" found and imported");
+//		} catch (FileNotFoundException e) {
+//			log.warn("Global preferences file  \"" + GLOBAL_PREFS_FILE
+//					+ "\" not found");
+//		} catch (IOException e) {
+//			log.warn("Error while working on \"" + GLOBAL_PREFS_FILE
+//					+ "\" : " + e.getMessage());
+//		} catch (InvalidPreferencesFormatException e) {
+//			log.warn("Error while importing global preferences : "
+//					+ e.getMessage());
+//		} finally {
+//			if (input != null) {
+//				try {
+//					input.close();
+//				} catch (IOException e) {
+//				}
+//			}
+//			if (!imported) {
+//				restoreDefaultPreferences();
+//			}
+//		}
+
+		// Importing user preferences
+		try {
+			input = new FileInputStream(new File(USER_PREFS_FILE));
+			Preferences.importPreferences(input);
+			log.info("User preferences file  \"" + USER_PREFS_FILE
+					+ "\" found and imported");
+		} catch (FileNotFoundException e) {
+			log.warn("User preferences file  \"" + USER_PREFS_FILE
+					+ "\" not found");
+		} catch (IOException e) {
+			log.warn("Error while working on \"" + USER_PREFS_FILE + "\" : "
+					+ e.getMessage());
+		} catch (InvalidPreferencesFormatException e) {
+			log.warn("Error while importing user preferences : "
+					+ e.getMessage());
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+
+		try {
+//			globalPrefs.sync();
+			userPrefs.sync();
+		} catch (BackingStoreException e) {
+			log.warn("Error with BackingStore");
+			log.debug(e.getStackTrace().toString());
+		}
+		applyPreferences();
+	}
+
+	/**
+	 * Export global and user preferences
+	 */
+	private void exportPreferences() {
+		log.info("Exporting Preferences");
+//		exportPreferencesToFile(globalPrefs, GLOBAL_PREFS_FILE,
+//				"global preferences");
+		exportPreferencesToFile(userPrefs, USER_PREFS_FILE, "user preferences");
+	}
+
+	/**
+	 * Export preferences into file
+	 * 
+	 * @param prefs
+	 *            {@link Preferences} to export
+	 * @param fileName
+	 *            name of the export file
+	 * @param desc
+	 *            description for logging
+	 */
+	private void exportPreferencesToFile(Preferences prefs, String fileName,
+			String desc) {
+		File file = new File(fileName);
+		FileOutputStream output = null;
+		if (!file.exists()) {
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				log.warn("Impossible to export " + desc + " to \""
+						+ fileName + "\" : " + e.getMessage());
+			}
+		}
+		if (file.exists()) {
+			try {
+				output = new FileOutputStream(file);
+				prefs.exportSubtree(output);
+				log.info(desc + " exported into \"" + fileName + "\"");
+			} catch (FileNotFoundException e) {
+				log.warn("Impossible to export " + desc + " into \""
+						+ fileName + "\" : " + e.getMessage());
+			} catch (IOException e) {
+				log.warn("Impossible to export " + desc + " into \""
+						+ fileName + "\" : " + e.getMessage());
+			} catch (BackingStoreException e) {
+				log.warn("Impossible to export " + desc + " into \""
+						+ fileName + "\" : " + e.getMessage());
+			} finally {
+				if (output != null) {
+					try {
+						output.close();
+					} catch (IOException e) {
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Do task before quitting. Do not call {@link System#exit(int)} but this
+	 * 
+	 * @param status
+	 *            @see {@link System#exit(int)}
+	 */
+	public void quit(int status) {
+		log.info("EXITING with status " + status);
+		exportPreferences();
+		System.exit(status);
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		quit(0);
+		super.finalize();
 	}
 }

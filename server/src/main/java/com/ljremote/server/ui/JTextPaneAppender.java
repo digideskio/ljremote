@@ -78,11 +78,17 @@ public class JTextPaneAppender extends AppenderSkeleton {
 		} else {
 			style = styleBase;
 		}
+		final String[] throwableStrRep = event.getThrowableStrRep();
 		SwingUtilities.invokeLater(new Runnable() {
 
 			public void run() {
 				try {
 					doc.insertString(doc.getLength(), message, style);
+					if ( throwableStrRep != null ) {
+						for ( int i = 0; i < throwableStrRep.length; i++ ) {
+							doc.insertString(doc.getLength(), throwableStrRep[i], style);
+						}
+					}
 				} catch (BadLocationException e) {
 					e.printStackTrace();
 				}

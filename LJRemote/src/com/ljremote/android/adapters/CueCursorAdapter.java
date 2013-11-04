@@ -18,7 +18,8 @@ import com.ljremote.android.data.CueManager;
 import com.ljremote.android.data.DataManager.TABLES;
 import com.ljremote.json.model.Cue;
 
-public class CueCursorAdapter extends AbstractCursorAdapter implements MultiChoiceModeListener {
+public class CueCursorAdapter extends AbstractCursorAdapter implements
+		MultiChoiceModeListener {
 
 	private int lastSelectedPos;
 
@@ -58,12 +59,13 @@ public class CueCursorAdapter extends AbstractCursorAdapter implements MultiChoi
 		switch (item.getItemId()) {
 		case R.id.load_cue:
 			Cue cue = getCueAtPosition(lastSelectedPos);
-			if( cue != null ) {
-				Log.d("CueCursorAdapter", "Cue " + cue.getId() + " - " + cue.getLabel() );
+			if (cue != null) {
+				Log.d("CueCursorAdapter",
+						"Cue " + cue.getId() + " - " + cue.getLabel());
 				((CueManager) manager).loadCue(cue.getId());
 			}
-			break;
-
+			mode.finish();
+			return true;
 		default:
 			break;
 		}
@@ -81,7 +83,7 @@ public class CueCursorAdapter extends AbstractCursorAdapter implements MultiChoi
 	@Override
 	public void onDestroyActionMode(ActionMode mode) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -94,9 +96,9 @@ public class CueCursorAdapter extends AbstractCursorAdapter implements MultiChoi
 	public void onItemCheckedStateChanged(ActionMode mode, int position,
 			long id, boolean checked) {
 		// TODO Auto-generated method stub
-		if( checked ) {
+		if (checked) {
 			Cue cue = getCueAtPosition(position);
-			if ( cue != null ) {
+			if (cue != null) {
 				lastSelectedPos = position;
 				mode.setTitle(cue.getLabel());
 				Log.d("CueCursorAdapter", "Position : " + position);
@@ -105,8 +107,8 @@ public class CueCursorAdapter extends AbstractCursorAdapter implements MultiChoi
 	}
 
 	private Cue getCueAtPosition(int position) {
-		Cursor c= getCursor();
-		if ( !c.moveToPosition(position) ){
+		Cursor c = getCursor();
+		if (!c.moveToPosition(position)) {
 			return null;
 		}
 		Cue cue = ((CueManager) manager).getCueFromCursor(c);

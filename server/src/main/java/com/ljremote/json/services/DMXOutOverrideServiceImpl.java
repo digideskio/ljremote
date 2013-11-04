@@ -25,6 +25,7 @@ public class DMXOutOverrideServiceImpl extends AbstractLJService implements
 	}
 
 	public boolean overRideChannels(List<DMXChannel> channels) {
+		log.debug("received :" + channels);
 		return driver.dmxOutOverride().override(listChannelsToMap(channels)) == 0;
 	}
 

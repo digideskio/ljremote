@@ -4,22 +4,20 @@ import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 import com.ljremote.android.R;
-import com.ljremote.android.data.DMXOutManager;
 import com.ljremote.android.data.DataManager.TABLES;
+import com.ljremote.android.data.MasterIntManager;
 import com.ljremote.json.model.DMXChannel;
 
-public class DMXOutCursorAdapter extends AbstractCursorAdapter {
-	public DMXOutCursorAdapter(DMXOutManager dmxOutManager) {
-		super(dmxOutManager, R.layout.fadder_item);
+public class MasterIntCursorAdapter extends AbstractCursorAdapter {
+	public MasterIntCursorAdapter(MasterIntManager manager) {
+		super(manager, R.layout.fadder_item);
 	}
 
 	@Override
@@ -33,10 +31,10 @@ public class DMXOutCursorAdapter extends AbstractCursorAdapter {
 
 	@Override
 	public void bindView(View view, Context context, Cursor cursor) {
-		DMXChannel channel = ((DMXOutManager) manager).getDMXChannelFromCursor(cursor);
+		DMXChannel channel = ((MasterIntManager) manager).getDMXChannelFromCursor(cursor);
 
 		TextView label = (TextView) view.findViewById(R.id.label);
-		label.setText(String.format("CH%03d", channel.getChannel()));
+		label.setText(String.format("Mstr %d", channel.getChannel()));
 		TextView value = (TextView) view.findViewById(R.id.value);
 		value.setText(Integer.toString(channel.getValue()));
 		value.setSelected(channel.isForce());
@@ -57,7 +55,7 @@ public class DMXOutCursorAdapter extends AbstractCursorAdapter {
 				Log.d("OnSeekBarChangeListener", "Channel " + id);
 				int progress = seekBar.getProgress();
 
-				if (((DMXOutManager) manager).updateValue(id, progress)) {
+				if (((MasterIntManager) manager).updateValue(id, progress)) {
 					reloadCursor();
 				}
 
@@ -77,37 +75,28 @@ public class DMXOutCursorAdapter extends AbstractCursorAdapter {
 
 	private void attachStateUpdater(TextView view, final Context context,
 			final int id) {
-//		view.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
+//		view.setOnTouchListener(new OnTouchListener() {
 //			
 //			@Override
-//			public void onCreateContextMenu(ContextMenu menu, View v,
-//					ContextMenuInfo menuInfo) {
-//				// TODO Auto-generated method stub
-//				
+//			public boolean onTouch(View v, MotionEvent event) {
+//				switch (event.getAction()) {
+//				case MotionEvent.ACTION_DOWN:
+//					Log.d("OnTouchListener", "Channel " + id + " selected");
+//					if( ((DMXOutManager) manager).forceDMXOut(id,!v.isSelected()) ){
+//						reloadCursor();
+//					}
+//					return true;
+//				default:
+//					break;
+//				}
+//				return false;
 //			}
 //		});
-		view.setOnTouchListener(new OnTouchListener() {
-			
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				switch (event.getAction()) {
-				case MotionEvent.ACTION_DOWN:
-					Log.d("OnTouchListener", "Channel " + id + " selected");
-					if( ((DMXOutManager) manager).forceDMXOut(id,!v.isSelected()) ){
-						reloadCursor();
-					}
-					return true;
-				default:
-					break;
-				}
-				return false;
-			}
-		});
 	}
 
 	@Override
 	public void onTableUpdateListener(Context context, TABLES table) {
-		if (table == TABLES.DMXOUT) {
+		if (table == TABLES.MASTER_INT) {
 			reloadCursor();
 		}
 	}

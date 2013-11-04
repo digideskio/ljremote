@@ -30,6 +30,8 @@ public class CueListFragment extends AbstractDetailFragment implements OnClickLi
 		ListView listView = (ListView) mainView.findViewById(R.id.cuelist_list);
 		CueListCursorAdapter adapter = new CueListCursorAdapter((CueListManager) getDataManager());
 		listView.setAdapter(adapter);
+		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+		listView.setMultiChoiceModeListener(adapter);
 
 		((Button) mainView.findViewById(R.id.up_all)).setOnClickListener(this);
 		((Button) mainView.findViewById(R.id.clear_all)).setOnClickListener(this);

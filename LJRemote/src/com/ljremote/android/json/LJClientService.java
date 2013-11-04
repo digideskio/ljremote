@@ -63,6 +63,7 @@ public class LJClientService extends Service {
 	};
 	@SuppressWarnings("unused")
 	private SharedPreferences prefs;
+	private boolean initiationComplete;
 
 	public interface OnModeChangeListener {
 		public void onModeChange(MODE newMode);
@@ -82,22 +83,32 @@ public class LJClientService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		Log.d(TAG, "onCreate");
+//		taskExecutor= Executors.newSingleThreadExecutor();
+//		taskExecutor.submit(new Runnable() {
+//			
+//			@Override
+//			public void run() {
+				initService();
+//			}
+//		});
+	}
+
+	private void initService(){
 		jrpc = new JsonRpcClient();
 		jrpc.setExceptionResolver(new LJNotFoundException()
-				.getExceptionResolver());
+		.getExceptionResolver());
 		socket = new Socket();
 		state = new AtomicReference<LJClientService.MODE>(MODE.NONE);
 		onModeChangeListeners = new LinkedList<LJClientService.OnModeChangeListener>();
 		keepAliveFactor = DEFAULT_KEEP_ALIVE_FACTOR;
 		keepAliveExecutor = Executors.newSingleThreadScheduledExecutor();
 		Log.d(TAG, "KeepAliveSender created");
-//		taskExecutor= Executors.newSingleThreadExecutor();
-//		Log.d(TAG, "Task executor created");
 		prefs= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		indicator=0;
-//		setHost(prefs.getString("", defValue), port)
+//				setHost(prefs.getString("", defValue), port)
+		initiationComplete = true;
 	}
-
+	
 	@Override
 	public IBinder onBind(Intent intent) {
 		state.set(MODE.UNBOUND);

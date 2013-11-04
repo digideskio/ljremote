@@ -197,7 +197,7 @@ public class MainActivity extends FragmentActivity implements
 		conf.putString(ConnectivityDialogFragment.SOCKET_ADDRESS, host_adress
 				+ ":" + host_port);
 		conf.putSerializable(ConnectivityDialogFragment.SERVICE_MODE,
-				ljService.getCurrentMode());
+				serviceBound && ljService != null  ? ljService.getCurrentMode() : MODE.NONE);
 	}
 
 	public boolean deviceIsLargeScreen() {

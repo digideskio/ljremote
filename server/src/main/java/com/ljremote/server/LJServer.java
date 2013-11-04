@@ -384,7 +384,7 @@ public class LJServer {
 
 			while (LJServer.this.keepRunning.get()) {
 				try {
-					serverSocket.setSoTimeout(SERVER_SOCKET_SO_TIMEOUT);
+//					serverSocket.setSoTimeout(SERVER_SOCKET_SO_TIMEOUT);
 
 					clientHandleExecutors.submit(new ClientHandle(serverSocket
 							.accept()));

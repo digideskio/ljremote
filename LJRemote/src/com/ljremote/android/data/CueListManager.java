@@ -22,15 +22,18 @@ public class CueListManager extends AbstractDataManager {
 
 	private abstract class CueListSyncTask<Progress, Params> extends JSonRpcTask<Params, Progress, Boolean>{
 		
+		protected CueListService getClientProxy() throws Exception{
+			return dm.getService() == null ? null : dm.getService().getClientProxy(CueListService.class);
+		}
+	}
+	
+	private abstract class CueListDataSyncTask<Progress, Params> extends CueListSyncTask<Params, Progress>{
+		
 		@Override
 		protected void onPostExecute(Boolean result) {
 			if( result != null && result ) {
 				fireDatabaseUpdate();
 			}
-		}
-		
-		protected CueListService getClientProxy() throws Exception{
-			return dm.getService() == null ? null : dm.getService().getClientProxy(CueListService.class);
 		}
 	}
 	
@@ -46,7 +49,7 @@ public class CueListManager extends AbstractDataManager {
 		if ( !dm.checkService() ){
 			return;
 		}
-		CueListSyncTask<Void, Void> task = new CueListSyncTask<Void, Void>() {
+		CueListDataSyncTask<Void, Void> task = new CueListDataSyncTask<Void, Void>() {
 			
 			@Override
 			protected Boolean doInBackground(Void... params) {
@@ -88,6 +91,26 @@ public class CueListManager extends AbstractDataManager {
 	public void clearAll() {
 		getDB().clearTable();
 		fireDatabaseUpdate();
+	}
+
+	public void loadCueList(final int id) {
+		if ( !dm.checkService() ){
+			return;
+		}
+		CueListSyncTask<Void, Void> task = new CueListSyncTask<Void, Void>() {
+
+			@Override
+			protected Boolean doInBackground(Void... params) {
+				Log.d(TAG, "Update");
+				try {
+					return getClientProxy().loadCueList(id);
+				} catch (LJNotFoundException e) {
+				} catch (Exception e) {
+				}
+				return false;
+			}
+		};
+		dm.getService().submit(task);
 	}
 	
 }

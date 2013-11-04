@@ -25,6 +25,9 @@
     <string name="hideExistingChannels">Hide Existing Channels</string>
     <string name="dmx_out_add_dialog_title">Add/Remove DMXOut Channes</string>
     <string name="add_selected">Add Selected</string>
+    <string name="load_cuelist">Load Cue List</string>
+    <string name="max_channels">Max Channels</string>
+    <string name="default_value">Default  Value</string>
 
 
 </resources>
