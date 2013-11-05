@@ -21,10 +21,8 @@ import com.ljremote.json.model.Seq;
 import com.ljremote.json.model.Static;
 import com.ljremote.server.driver.LJDriver.MyUserLib.ExternalDMXOverride;
 import com.ljremote.server.driver.LJDriver.MyUserLib.MasterIntensitySettings;
-import com.ljremote.server.driver.LJDriver.MyUserLib.StaticItem;
 import com.ljremote.server.driver.User32Ex.COPYDATASTRUCT;
 import com.ljremote.server.driver.Win32CopyDataMonitor.OnDataReceiver;
-import com.sun.jna.NativeLong;
 import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
@@ -645,7 +643,6 @@ public class LJDriver implements OnDataReceiver {
 				copy_data.write();
 			}
 
-			// return 0;
 			return startStopSendingData();
 		}
 

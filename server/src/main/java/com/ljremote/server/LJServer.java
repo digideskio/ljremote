@@ -525,4 +525,8 @@ public class LJServer {
 	public static long getDefaultClientTimeout() {
 		return DEFAULT_CLIENT_TIMEOUT_UNIT.toMillis(DEFAULT_CLIENT_TIMEOUT);
 	}
+
+	public int getClientCount() {
+		return clientManager.getClientCount();
+	}
 }

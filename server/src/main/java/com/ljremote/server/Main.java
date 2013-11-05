@@ -1,6 +1,6 @@
 package com.ljremote.server;
 
-import com.ljremote.server.ui.MainWindow;
+import com.ljremote.server.core.LJServerCore;
 
 public class Main {
 
@@ -8,7 +8,7 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		MainWindow.main(args);
+		new LJServerCore(args);
 	}
 
 }

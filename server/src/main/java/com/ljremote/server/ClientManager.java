@@ -97,4 +97,8 @@ public class ClientManager implements ServerService {
 	public void consumeClient(ClientConfig conf) {
 		clientConfigs.remove(conf);
 	}
+	
+	public int getClientCount() {
+		return clientConfigs.size();
+	}
 }

@@ -1,20 +1,11 @@
 package com.ljremote.server.ui;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.EventQueue;
+import java.awt.Container;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.InvalidPreferencesFormatException;
-import java.util.prefs.Preferences;
 
+import javax.swing.AbstractButton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
@@ -35,57 +26,29 @@ import javax.swing.JTextPane;
 import javax.swing.JToolBar;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SpringLayout;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.googlecode.jsonrpc4j.JsonRpcServer;
-import com.googlecode.jsonrpc4j.ProxyUtil;
-import com.ljremote.json.exceptions.LJNotFoundException;
-import com.ljremote.json.services.BGCueService;
-import com.ljremote.json.services.BGCueServiceImpl;
-import com.ljremote.json.services.ControlService;
-import com.ljremote.json.services.ControlServiceImpl;
-import com.ljremote.json.services.CueListService;
-import com.ljremote.json.services.CueListServiceImpl;
-import com.ljremote.json.services.CueService;
-import com.ljremote.json.services.CueServiceImpl;
-import com.ljremote.json.services.DMXOutOverrideService;
-import com.ljremote.json.services.DMXOutOverrideServiceImpl;
-import com.ljremote.json.services.DriverService;
-import com.ljremote.json.services.DriverServiceImpl;
-import com.ljremote.json.services.LJFunctionService;
-import com.ljremote.json.services.LJFunctionServiceImpl;
-import com.ljremote.json.services.MasterIntService;
-import com.ljremote.json.services.MasterIntServiceImpl;
-import com.ljremote.json.services.SequenceService;
-import com.ljremote.json.services.SequenceServiceImpl;
-import com.ljremote.json.services.ServerService;
-import com.ljremote.json.services.StaticService;
-import com.ljremote.json.services.StaticServiceImpl;
-import com.ljremote.server.ClientManager;
 import com.ljremote.server.LJServer;
 import com.ljremote.server.LJServer.ClientConnectionListener;
 import com.ljremote.server.LJServer.OnServerStatusChangeListener;
-import com.ljremote.server.Main;
+import com.ljremote.server.controller.UIController;
+import com.ljremote.server.controller.UIControllerAction;
+import com.ljremote.server.controller.UIControllerActionBuilder;
+import com.ljremote.server.core.LJServerCore;
 import com.ljremote.server.driver.LJDriver;
-import com.ljremote.server.driver.util.WindowUtil;
 
-public class MainWindow implements OnServerStatusChangeListener,
+public class LJServerGUI extends JFrame implements OnServerStatusChangeListener,
 		ClientConnectionListener {
 
-	private JFrame frmLjServer;
 	private JTextPane logPane;
 	private JLabel status;
 	private LJServer server = null;
-	private static final Log log = LogFactory.getLog(MainWindow.class);
 	private static final String SERVER_RUNNING = "Running";
 	private static final String SERVER_STOPPED = "Stopped";
 	private JButton btnStop;
@@ -98,91 +61,48 @@ public class MainWindow implements OnServerStatusChangeListener,
 	private JTextField lParamField;
 	private LJDriver driver;
 	private Options options;
-	private boolean debug = false;
 	private JTextField portField;
 	
-	/*--- CONSTANTS -----------------*/
-	/** Application name */
-	public final static String APP_NAME = "LJRemoteServer";
 
-	/*--- PREFERENCES ---------------*/
-	/** Root node for the package */
-	public final static String PREFS_NODE = "com/ljremote/server/ljRemoteServer";
-
-//	/** System Preferences for the application */
-//	private static Preferences globalPrefs = Preferences.systemRoot().node(
-//			PREFS_NODE);
-
-	/** User Preferences for the application */
-	private static Preferences userPrefs = Preferences.userRoot().node(
-			PREFS_NODE);
-
-	/*--- FILES -----------------*/
-	/** Global preferences file name */
-	private final static String GLOBAL_PREFS_FILE = "global.xml";
-	/** User preferences file name */
-	private final static String USER_PREFS_FILE = "user.xml";
+	/** Logger */
+	private static final Log log = LogFactory.getLog(LJServerGUI.class);
 	
-	/*--- Entries --------------*/
-	private static final String SERVER_PORT = "server/port";
-	private static final int SERVER_PORT_DEFAULT = 2508;
-	private static final String SERVER_MAX_CLIENTS = "server/max_clients";
-	private static final int SERVER_MAX_CLIENTS_DEFAULT = 5;
-
 	/**
-	 * Launch the application.
+	 * Main application
+	 * @uml.property  name="main"
+	 * @uml.associationEnd  multiplicity="(1 1)" inverse="mainFrame:ft.dps.ntv.serviceDuplicator.core.ServiceDuplicatorMain"
 	 */
-	public static void main(final String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					MainWindow window = new MainWindow(args);
-					window.frmLjServer.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	protected void setAguments(String[] args) {
-		initOptions();
-		CommandLineParser parser = new GnuParser();
-		try {
-			CommandLine cmd = parser.parse(options, args);
-
-			debug = cmd.hasOption("debug");
-		} catch (ParseException e) {
-			log.fatal("Error while parsing arguments", e);
-		}
-	}
-
+	private LJServerCore main;
+	private UIController listener;
+	
 	/**
 	 * Create the application.
 	 */
-	public MainWindow(String[] args) {
-		setAguments(args);
-		importPreferences();
+	public LJServerGUI(LJServerCore main) {
+		super(LJServerCore.APP_NAME);
+		this.main = main;
 		initialize();
-	}
-
-	private void initOptions() {
-		options = new Options();
-		options.addOption("debug", false, "Active debug mode");
 	}
 
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	@SuppressWarnings("serial")
 	private void initialize() {
-		frmLjServer = new JFrame();
-		frmLjServer.setTitle("LJ Server");
-		frmLjServer.setBounds(100, 100, 450, 300);
-		frmLjServer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setBounds(100, 100, 450, 300);
+		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		listener = new UIController(main);
+		this.addWindowListener(listener);
+		SwingUtilities.invokeLater(new Runnable() {
+			
+			public void run() {
+				setContentPane(mainPane());
+			}
+		});
+		this.setVisible(true);
+	}
 
+	protected Container mainPane() {
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		frmLjServer.getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
 		JPanel generalPanel = new JPanel();
 		tabbedPane.addTab("General", null, generalPanel, null);
@@ -250,31 +170,23 @@ public class MainWindow implements OnServerStatusChangeListener,
 										Short.MAX_VALUE)));
 
 		btnStart = new JButton("Start");
-		btnStart.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseReleased(MouseEvent arg0) {
-				createAndStartServer();
-			}
-		});
+		addActionCommand(btnStart, new UIControllerActionBuilder(UIControllerAction.SERVER_START).toString());
 		panel_2.add(btnStart);
 
 		btnStop = new JButton("Stop");
-		btnStop.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				stopServer();
-			}
-		});
+		
+		addActionCommand(btnStop, new UIControllerActionBuilder(UIControllerAction.SERVER_STOP).toString());
 		panel_2.add(btnStop);
 
-		if (debug) {
+		if (main.isDebug()) {
 			JButton btnPrintAllWindows = new JButton("Print All Windows");
-			btnPrintAllWindows.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseReleased(MouseEvent arg0) {
-					WindowUtil.enumAllWindows();
-				}
-			});
+			addActionCommand(btnPrintAllWindows, new UIControllerActionBuilder(UIControllerAction.USER32_WND_PRINTALL).toString());
+//			btnPrintAllWindows.addMouseListener(new MouseAdapter() {
+//				@Override
+//				public void mouseReleased(MouseEvent arg0) {
+//					WindowUtil.enumAllWindows();
+//				}
+//			});
 			panel_2.add(btnPrintAllWindows);
 		}
 
@@ -383,7 +295,7 @@ public class MainWindow implements OnServerStatusChangeListener,
 
 		portField = new JTextField();
 		portField.setToolTipText("Enter server port");
-		portField.setText(String.valueOf(getGlobalPrefs().getInt(SERVER_PORT, SERVER_PORT_DEFAULT)));
+		portField.setText(String.valueOf(main.getServerPort()));
 		portField.setColumns(10);
 		GroupLayout gl_panel_7 = new GroupLayout(panel_7);
 		gl_panel_7.setHorizontalGroup(gl_panel_7.createParallelGroup(
@@ -433,7 +345,7 @@ public class MainWindow implements OnServerStatusChangeListener,
 		clientTabble.getColumnModel().getColumn(4).setResizable(false);
 		clientTabble.getColumnModel().getColumn(4).setPreferredWidth(55);
 
-		if (debug) {
+		if (main.isDebug()) {
 
 			JPanel panel_4 = new JPanel();
 			tabbedPane.addTab("SM tests", null, panel_4, null);
@@ -461,26 +373,27 @@ public class MainWindow implements OnServerStatusChangeListener,
 			lParamField.setColumns(10);
 
 			JButton btnSendMessage = new JButton("Send Message");
-			btnSendMessage.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseReleased(MouseEvent e) {
-					if (server == null || !server.isStarted()) {
-						resultTextArea.setText("Start server first");
-					} else {
-						try {
-							int uMsg = Integer.parseInt(uMsgField.getText());
-							int wParam = Integer.parseInt(wParamField.getText());
-							int lParam = Integer.parseInt(lParamField.getText());
-							int ret = driver.sendMessageToLj(uMsg, wParam,
-									lParam);
-							resultTextArea.setText(String.valueOf(ret) + " (0x"
-									+ Integer.toHexString(ret) + ")");
-						} catch (NumberFormatException e1) {
-							resultTextArea.setText(e1.getLocalizedMessage());
-						}
-					}
-				}
-			});
+//			addActionCommand(btnSendMessage, new UIControllerActionBuilder(UIControllerAction.DRIVER_));
+//			btnSendMessage.addMouseListener(new MouseAdapter() {
+//				@Override
+//				public void mouseReleased(MouseEvent e) {
+//					if (server == null || !server.isStarted()) {
+//						resultTextArea.setText("Start server first");
+//					} else {
+//						try {
+//							int uMsg = Integer.parseInt(uMsgField.getText());
+//							int wParam = Integer.parseInt(wParamField.getText());
+//							int lParam = Integer.parseInt(lParamField.getText());
+//							int ret = driver.sendMessageToLj(uMsg, wParam,
+//									lParam);
+//							resultTextArea.setText(String.valueOf(ret) + " (0x"
+//									+ Integer.toHexString(ret) + ")");
+//						} catch (NumberFormatException e1) {
+//							resultTextArea.setText(e1.getLocalizedMessage());
+//						}
+//					}
+//				}
+//			});
 			GroupLayout gl_panel_5 = new GroupLayout(panel_5);
 			gl_panel_5
 					.setHorizontalGroup(gl_panel_5
@@ -602,8 +515,15 @@ public class MainWindow implements OnServerStatusChangeListener,
 		}
 
 		setDefaultConfig();
+		
+		return tabbedPane;
 	}
 
+	
+	private void addActionCommand(AbstractButton button, String command){
+		button.setActionCommand(command);
+		button.addActionListener(listener);
+	}
 	protected void applySettingsAndRestartServer() {
 		boolean restartServer = false;
 
@@ -611,96 +531,16 @@ public class MainWindow implements OnServerStatusChangeListener,
 		if (value != null) {
 			try {
 				int port = Integer.parseInt(value);
-				getGlobalPrefs().put(SERVER_PORT, value);
-				exportPreferences();
+				main.updateServerPort(port);
 				restartServer = true;
 			} catch (NumberFormatException e) {
 
 			}
 
 		}
-		if (restartServer && server != null && server.isStarted() && clientNumberInt > 0 ) {
-			switch (JOptionPane
-					.showConfirmDialog(
-							frmLjServer,
-							String.format("%d clients are still connected are you sure you want to restart server now ?",
-									clientNumberInt),
-							"Restart Server",
-							JOptionPane.YES_NO_OPTION,
-							JOptionPane.WARNING_MESSAGE,null
-							)
-					) {
-			case JOptionPane.NO_OPTION:
-				restartServer = false;
-				break;
-			case JOptionPane.YES_OPTION:
-			default:
-				break;
-			}
-		}
-		if (restartServer) {
-			stopServer();
-			createAndStartServer();
-		}
-	}
-
-	protected void createAndStartServer() {
-		driver = new LJDriver();
-
-		if (driver == null) {
-			log.error("Impossible d'initialiser le driver");
-			return;
-		}
-
-		driver.findLJ();
-		ClientManager clientManager = new ClientManager();
-		DriverService driverService = new DriverServiceImpl(driver);
-		JsonRpcServer jsonRpcServer = new JsonRpcServer(
-				ProxyUtil.createCompositeServiceProxy(
-						Main.class.getClassLoader(),
-						new Object[] { clientManager, driverService,
-								new StaticServiceImpl(driver),
-								new CueServiceImpl(driver),
-								new SequenceServiceImpl(driver),
-								new BGCueServiceImpl(driver),
-								new CueListServiceImpl(driver),
-								new ControlServiceImpl(driver),
-								new LJFunctionServiceImpl(driver),
-								new DMXOutOverrideServiceImpl(driver),
-								new MasterIntServiceImpl(driver),
-								},
-						new Class<?>[] { ServerService.class,
-								DriverService.class, StaticService.class,
-								CueService.class, SequenceService.class,
-								BGCueService.class, CueListService.class,
-								ControlService.class, LJFunctionService.class, DMXOutOverrideService.class,
-								MasterIntService.class},
-						true));
-
-		jsonRpcServer.setErrorResolver(new LJNotFoundException()
-				.getErrorResolver());
-		int maxThreads = getGlobalPrefs().getInt(SERVER_MAX_CLIENTS, SERVER_MAX_CLIENTS_DEFAULT);
-		int port = getGlobalPrefs().getInt(SERVER_PORT, SERVER_PORT_DEFAULT);
-		clientNumberInt = 0;
-		try {
-			server = new LJServer(clientManager, jsonRpcServer, maxThreads,
-					new ServerSocket(port));
-			server.setOnServerStatusChange(this);
-			server.registerClientConnectionListenrer(this);
-			server.start();
-		} catch (IOException e1) {
-			log.error(e1);
-		}
-	}
-
-	protected void stopServer() {
-		if (server != null && server.isStarted()) {
-			try {
-				driver.stopActions();
-				server.stop();
-			} catch (InterruptedException e) {
-				log.error(e);
-			}
+		
+		if ( restartServer ) {
+			listener.processCmd(new UIControllerActionBuilder(UIControllerAction.SERVER_RESTART).toString());
 		}
 	}
 
@@ -754,185 +594,5 @@ public class MainWindow implements OnServerStatusChangeListener,
 		default:
 			break;
 		}
-	}
-	
-	/**
-	 * Get the global application preferences
-	 * 
-	 * @return global application preferences
-	 */
-	public Preferences getGlobalPrefs() {
-		return userPrefs;
-	}
-
-	/**
-	 * Get the user application preferences
-	 * 
-	 * @return user application preferences
-	 */
-	public Preferences getUserPrefs() {
-		return userPrefs;
-	}
-	
-	/**
-	 * Restore global preferences to default values
-	 * 
-	 */
-	private void restoreDefaultPreferences() {
-		log.info("Restoring default preferences");
-		applyPreferences();
-	}
-	
-	/**
-	 * Update application variables from preferences
-	 * 
-	 */
-	private void applyPreferences() {
-	}
-	
-	/**
-	 * Import preferences from defined files
-	 * 
-	 */
-	private void importPreferences() {
-		log.info("Checking Preferences Files");
-		boolean imported = false;
-		FileInputStream input = null;
-
-//		// Importing global preferences
-//		try {
-//			input = new FileInputStream(new File(GLOBAL_PREFS_FILE));
-//			Preferences.importPreferences(input);
-//			imported = true;
-//			log.info("Global preferences file  \"" + GLOBAL_PREFS_FILE
-//					+ "\" found and imported");
-//		} catch (FileNotFoundException e) {
-//			log.warn("Global preferences file  \"" + GLOBAL_PREFS_FILE
-//					+ "\" not found");
-//		} catch (IOException e) {
-//			log.warn("Error while working on \"" + GLOBAL_PREFS_FILE
-//					+ "\" : " + e.getMessage());
-//		} catch (InvalidPreferencesFormatException e) {
-//			log.warn("Error while importing global preferences : "
-//					+ e.getMessage());
-//		} finally {
-//			if (input != null) {
-//				try {
-//					input.close();
-//				} catch (IOException e) {
-//				}
-//			}
-//			if (!imported) {
-//				restoreDefaultPreferences();
-//			}
-//		}
-
-		// Importing user preferences
-		try {
-			input = new FileInputStream(new File(USER_PREFS_FILE));
-			Preferences.importPreferences(input);
-			log.info("User preferences file  \"" + USER_PREFS_FILE
-					+ "\" found and imported");
-		} catch (FileNotFoundException e) {
-			log.warn("User preferences file  \"" + USER_PREFS_FILE
-					+ "\" not found");
-		} catch (IOException e) {
-			log.warn("Error while working on \"" + USER_PREFS_FILE + "\" : "
-					+ e.getMessage());
-		} catch (InvalidPreferencesFormatException e) {
-			log.warn("Error while importing user preferences : "
-					+ e.getMessage());
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-				}
-			}
-		}
-
-		try {
-//			globalPrefs.sync();
-			userPrefs.sync();
-		} catch (BackingStoreException e) {
-			log.warn("Error with BackingStore");
-			log.debug(e.getStackTrace().toString());
-		}
-		applyPreferences();
-	}
-
-	/**
-	 * Export global and user preferences
-	 */
-	private void exportPreferences() {
-		log.info("Exporting Preferences");
-//		exportPreferencesToFile(globalPrefs, GLOBAL_PREFS_FILE,
-//				"global preferences");
-		exportPreferencesToFile(userPrefs, USER_PREFS_FILE, "user preferences");
-	}
-
-	/**
-	 * Export preferences into file
-	 * 
-	 * @param prefs
-	 *            {@link Preferences} to export
-	 * @param fileName
-	 *            name of the export file
-	 * @param desc
-	 *            description for logging
-	 */
-	private void exportPreferencesToFile(Preferences prefs, String fileName,
-			String desc) {
-		File file = new File(fileName);
-		FileOutputStream output = null;
-		if (!file.exists()) {
-			try {
-				file.createNewFile();
-			} catch (IOException e) {
-				log.warn("Impossible to export " + desc + " to \""
-						+ fileName + "\" : " + e.getMessage());
-			}
-		}
-		if (file.exists()) {
-			try {
-				output = new FileOutputStream(file);
-				prefs.exportSubtree(output);
-				log.info(desc + " exported into \"" + fileName + "\"");
-			} catch (FileNotFoundException e) {
-				log.warn("Impossible to export " + desc + " into \""
-						+ fileName + "\" : " + e.getMessage());
-			} catch (IOException e) {
-				log.warn("Impossible to export " + desc + " into \""
-						+ fileName + "\" : " + e.getMessage());
-			} catch (BackingStoreException e) {
-				log.warn("Impossible to export " + desc + " into \""
-						+ fileName + "\" : " + e.getMessage());
-			} finally {
-				if (output != null) {
-					try {
-						output.close();
-					} catch (IOException e) {
-					}
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Do task before quitting. Do not call {@link System#exit(int)} but this
-	 * 
-	 * @param status
-	 *            @see {@link System#exit(int)}
-	 */
-	public void quit(int status) {
-		log.info("EXITING with status " + status);
-		exportPreferences();
-		System.exit(status);
-	}
-
-	@Override
-	protected void finalize() throws Throwable {
-		quit(0);
-		super.finalize();
 	}
 }
