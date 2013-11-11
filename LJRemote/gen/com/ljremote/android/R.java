@@ -64,15 +64,15 @@ some parent container.
         public static final int LinearLayout01=0x7f050017;
         public static final int RelativeLayout1=0x7f050003;
         public static final int Space1=0x7f05002d;
-        public static final int add_dmx_out=0x7f05004b;
-        public static final int address=0x7f050043;
+        public static final int add_dmx_out=0x7f05004f;
+        public static final int address=0x7f050045;
         public static final int bgcue_list=0x7f050007;
         public static final int bottom=0x7f05000a;
         public static final int bound=0x7f050001;
         public static final int cancel_button=0x7f05000c;
         public static final int channel=0x7f050035;
         public static final int clear_all=0x7f050008;
-        public static final int connect_button=0x7f050041;
+        public static final int connect_button=0x7f050043;
         public static final int cue_list=0x7f05001c;
         public static final int cue_sequences=0x7f05001f;
         public static final int cuelist_list=0x7f05001d;
@@ -87,13 +87,14 @@ some parent container.
         public static final int driver_status_large=0x7f05001a;
         public static final int driver_status_version=0x7f05001b;
         public static final int emptyTextView=0x7f05003c;
-        public static final int frameLayout1=0x7f050040;
+        public static final int frameLayout1=0x7f050042;
         public static final int frggtgthth=0x7f050024;
         public static final int func_list=0x7f050030;
         public static final int grid=0x7f050009;
         public static final int hideSwitch=0x7f05000b;
+        public static final int horizontalScrollView1=0x7f05003e;
         public static final int id=0x7f050036;
-        public static final int imageView1=0x7f05003f;
+        public static final int imageView1=0x7f050041;
         public static final int intensity=0x7f05003a;
         public static final int jsonConnect=0x7f050025;
         public static final int jsonDisconnect=0x7f050026;
@@ -106,13 +107,14 @@ some parent container.
         public static final int jsonUnDrive=0x7f05002f;
         public static final int label=0x7f050021;
         public static final int linearLayout1=0x7f050011;
-        public static final int load_cue=0x7f050049;
-        public static final int load_cuelist=0x7f05004a;
+        public static final int load_cue=0x7f05004d;
+        public static final int load_cuelist=0x7f05004e;
         public static final int menu=0x7f050033;
-        public static final int menu_black_out=0x7f050047;
-        public static final int menu_change_mode=0x7f050048;
+        public static final int menu_affiche=0x7f05004b;
+        public static final int menu_black_out=0x7f050049;
+        public static final int menu_change_mode=0x7f05004a;
         public static final int menu_container=0x7f050004;
-        public static final int menu_settings=0x7f050046;
+        public static final int menu_settings=0x7f050048;
         public static final int mstr_int_list=0x7f050034;
         public static final int ok_button=0x7f05000d;
         public static final int refresh=0x7f05004c;
@@ -127,17 +129,18 @@ some parent container.
         public static final int server_status_address=0x7f050014;
         public static final int server_status_icon=0x7f05000f;
         public static final int server_status_large=0x7f050010;
-        public static final int setting_button=0x7f050042;
-        public static final int sliding_main=0x7f05003e;
+        public static final int setting_button=0x7f050044;
+        public static final int sliding_main=0x7f050040;
         public static final int static_list=0x7f050038;
-        public static final int status_icon=0x7f050044;
-        public static final int status_large=0x7f050045;
+        public static final int status_icon=0x7f050046;
+        public static final int status_large=0x7f050047;
         public static final int toggle=0x7f050039;
         public static final int trueTabHostContainer=0x7f05003d;
         public static final int unbound=0x7f050000;
         public static final int up_all=0x7f050006;
         public static final int value=0x7f050023;
         public static final int view1=0x7f050027;
+        public static final int viewpager=0x7f05003f;
     }
     public static final class integer {
         public static final int NUM_MAX_LENGTH=0x7f060000;
@@ -172,10 +175,11 @@ some parent container.
     }
     public static final class menu {
         public static final int activity_main=0x7f0a0000;
-        public static final int cue_context=0x7f0a0001;
-        public static final int cuelist_context=0x7f0a0002;
-        public static final int dmx_out_fragment=0x7f0a0003;
-        public static final int ljfunction=0x7f0a0004;
+        public static final int common_fragment=0x7f0a0001;
+        public static final int cue_context=0x7f0a0002;
+        public static final int cuelist_context=0x7f0a0003;
+        public static final int dmx_out_fragment=0x7f0a0004;
+        public static final int ljfunction=0x7f0a0005;
     }
     public static final class string {
         public static final int add_selected=0x7f07001d;

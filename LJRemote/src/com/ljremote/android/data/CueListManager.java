@@ -46,6 +46,11 @@ public class CueListManager extends AbstractDataManager {
 	}
 	
 	public void updateAllDB(){
+
+	}
+	
+	@Override
+	public void refreshData() {
 		if ( !dm.checkService() ){
 			return;
 		}
@@ -60,6 +65,7 @@ public class CueListManager extends AbstractDataManager {
 					if ( cueLists == null ){
 						return false;
 					}
+					getDB().clearTable();
 					for(CueList cueList : cueLists){
 						getDB().insertOrUpdate(cueList.getId(), cueList.getLabel());
 					}

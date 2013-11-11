@@ -2,7 +2,9 @@ package com.ljremote.android.data;
 
 import java.util.List;
 
+import android.content.Context;
 import android.database.Cursor;
+import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
 import com.ljremote.android.data.DataManager.TABLES;
@@ -43,33 +45,6 @@ public class SequenceManager extends AbstractDataManager {
 	}
 	
 	public void updateAllDB(){
-		if ( !dm.checkService() ){
-			return;
-		}
-		SequenceSyncTask<Void, Void> task = new SequenceSyncTask<Void, Void>() {
-			
-			@Override
-			protected Boolean doInBackground(Void... params) {
-				Log.d(TAG, "Update");
-				List<Seq> sequences;
-				try {
-					sequences = getClientProxy().getSequenceList();
-					if ( sequences == null ){
-						return false;
-					}
-					for(Seq seq : sequences){
-						getDB().insertOrUpdate(seq.getId(), seq.getLabel());
-					}
-					Log.d(TAG, "Done");
-					return true;
-				} catch (LJNotFoundException e) {
-				} catch (Exception e) {
-				}
-				return false;
-			}
-			
-		};
-		dm.getService().submit(task);
 	}
 
 	public boolean clearAll(){
@@ -91,4 +66,90 @@ public class SequenceManager extends AbstractDataManager {
 	public void fireDatabaseUpdate() {
 		dm.fireDatabaseUpdate(TABLES.SEQUENCES);
 	}
+	
+	public class SequenceLoader extends AsyncTaskLoader<Cursor> {
+
+		private SequenceService proxy = null;
+
+		public SequenceLoader(Context context) {
+			super(context);
+			SequenceSyncTask<Void, Void> task = new SequenceSyncTask<Void, Void>() {
+				
+				@Override
+				protected Boolean doInBackground(Void... params) {
+					return false;
+				}
+				
+			};
+			try {
+				proxy = task.getClientProxy();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		
+		
+		@Override
+		protected void onStartLoading() {
+			deliverResult(getCursor());
+		}
+
+
+
+		@Override
+		public Cursor loadInBackground() {
+			Log.d(TAG, "Update");
+			List<Seq> sequences;
+			try {
+				sequences = proxy.getSequenceList();
+				if ( sequences == null ){
+					return null;
+				}
+				for(Seq seq : sequences){
+					getDB().insertOrUpdate(seq.getId(), seq.getLabel());
+				}
+				Log.d(TAG, "Done");
+				return getCursor();
+			} catch (LJNotFoundException e) {
+			} catch (Exception e) {
+			}
+			return null;
+		}
+		
+	}
+
+	@Override
+	public void refreshData() {
+		if ( !dm.checkService() ){
+			return;
+		}
+		SequenceSyncTask<Void, Void> task = new SequenceSyncTask<Void, Void>() {
+			
+			@Override
+			protected Boolean doInBackground(Void... params) {
+				Log.d(TAG, "Update");
+				List<Seq> sequences;
+				try {
+					sequences = getClientProxy().getSequenceList();
+					if ( sequences == null ){
+						return false;
+					}
+					getDB().clearTable();
+					for(Seq seq : sequences){
+						getDB().insertOrUpdate(seq.getId(), seq.getLabel());
+					}
+					Log.d(TAG, "Done");
+					return true;
+				} catch (LJNotFoundException e) {
+				} catch (Exception e) {
+				}
+				return false;
+			}
+			
+		};
+		dm.getService().submit(task);
+	}
+	
+	
 }

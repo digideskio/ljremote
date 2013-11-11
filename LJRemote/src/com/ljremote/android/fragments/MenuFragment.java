@@ -47,11 +47,12 @@ public class MenuFragment extends Fragment implements OnItemClickListener {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		Log.d("MenuFragment", "onCreateView tag=" +getTag() + ", " + getArguments());
+		Log.d("MenuFragment", "onCreateView tag=" + getTag() + ", "
+				+ getArguments());
 		mainView = inflater.inflate(R.layout.menu_fragment, null, true);
 		updateList();
 
-		if ( getArguments() != null){
+		if (getArguments() != null) {
 			changeServerMode((MODE) getArguments().get(SERVICE_MODE));
 		}
 		MainActivity main = (MainActivity) getActivity();
@@ -90,28 +91,30 @@ public class MenuFragment extends Fragment implements OnItemClickListener {
 	}
 
 	public void changeServerMode(MODE newMode, MenuItem itemChangeMode) {
-		int icon_id;
-		int text_id;
-		switch (newMode) {
-		case DRIVE:
-			icon_id = R.drawable.ic_menu_cycle_green;
-			text_id = R.string.server_mode_driver;
-			break;
-		case BOUND:
-			icon_id = R.drawable.ic_menu_cycle_orange;
-			text_id = R.string.server_mode_bound;
-			break;
-		default:
-			icon_id = R.drawable.ic_menu_cycle_red;
-			text_id = R.string.server_mode_unbound;
-			break;
-		}
-		server_mode_icon.setImageResource(icon_id);
-		server_mode_text.setText(text_id);
-		if (itemChangeMode != null) {
-			itemChangeMode.setIcon(icon_id);
-		}
+		if (isVisible()) {
+			int icon_id;
+			int text_id;
+			switch (newMode) {
+			case DRIVE:
+				icon_id = R.drawable.ic_menu_cycle_green;
+				text_id = R.string.server_mode_driver;
+				break;
+			case BOUND:
+				icon_id = R.drawable.ic_menu_cycle_orange;
+				text_id = R.string.server_mode_bound;
+				break;
+			default:
+				icon_id = R.drawable.ic_menu_cycle_red;
+				text_id = R.string.server_mode_unbound;
+				break;
+			}
+			server_mode_icon.setImageResource(icon_id);
+			server_mode_text.setText(text_id);
+			if (itemChangeMode != null) {
+				itemChangeMode.setIcon(icon_id);
+			}
 
+		}
 	}
 
 }

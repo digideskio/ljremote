@@ -5,9 +5,6 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTabHost;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 
 import com.ljremote.android.MainActivity;
 import com.ljremote.android.R;
@@ -17,8 +14,6 @@ import com.ljremote.android.data.LJFunctionManager;
 import com.ljremote.json.model.LJFunction;
 
 public class TabbedLJFunctionFragment extends AbstractTabbedDetailFragment implements OnDatabaseUpdateListener {
-
-	private Menu optionsMenu;
 
 	public TabbedLJFunctionFragment() {
 		super(R.string.ljfunctions);
@@ -42,7 +37,7 @@ public class TabbedLJFunctionFragment extends AbstractTabbedDetailFragment imple
 			cursor = funcManager.getGroupFunctionCursor(group_id);
 		}
 		if (cursor != null && cursor.getCount() > 0) {
-			FragmentTabHost tabHost = getNewTabHost();
+			SlidingTabHelper tabHelper = newSlidingTabHelper();
 			cursor.moveToFirst();
 			do {
 				LJFunction groupFunc = funcManager
@@ -50,49 +45,26 @@ public class TabbedLJFunctionFragment extends AbstractTabbedDetailFragment imple
 				Bundle args = new Bundle();
 				args.putInt("group_id", groupFunc.getId());
 				if (funcManager.isGroupOfGroupFunction(groupFunc.getId())) {
-					tabHost.addTab(
-							tabHost.newTabSpec(
+					
+					tabHelper.addTab(
+							tabHelper.newTabSpec(
 									String.valueOf(groupFunc.getId()))
 									.setIndicator(groupFunc.getName()),
-							TabbedLJFunctionFragment.class, args);
+							TabbedLJFunctionFragment.class, args,groupFunc.getName());
 				} else {
-					tabHost.addTab(
-							tabHost.newTabSpec(
+					tabHelper.addTab(
+							tabHelper.newTabSpec(
 									String.valueOf(groupFunc.getId()))
 									.setIndicator(groupFunc.getName()),
-							LJFunctionFragment.class, args);
+							LJFunctionFragment.class, args,groupFunc.getName());
 				}
 			} while (cursor.moveToNext());
 
-			setTabHost(tabHost);
+			setTabHelper(tabHelper);
 			switchEmptyMode(false);
 		} else {
 			switchEmptyMode(true);
 		}
-	}
-
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		if ( getGroupId() == 0 ) {
-			this.optionsMenu = menu;
-			inflater.inflate(R.menu.ljfunction, menu);
-		}
-		super.onCreateOptionsMenu(menu, inflater);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if ( getGroupId() == 0 ) {
-			switch (item.getItemId()) {
-			case R.id.refresh:
-				((LJFunctionManager) getDataManager()).refreshData();
-				setRefreshActionButtonState(true);
-				break;
-			default:
-				break;
-			}
-		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
@@ -119,17 +91,4 @@ public class TabbedLJFunctionFragment extends AbstractTabbedDetailFragment imple
 		}
 	}
 
-	public void setRefreshActionButtonState(final boolean refreshing) {
-	    if (isResumed() && optionsMenu != null) {
-	        final MenuItem refreshItem = optionsMenu
-	            .findItem(R.id.refresh);
-	        if (refreshItem != null) {
-	            if (refreshing) {
-	                refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
-	            } else {
-	                refreshItem.setActionView(null);
-	            }
-	        }
-	    }
-	}
 }

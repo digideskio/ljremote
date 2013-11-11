@@ -28,4 +28,6 @@ public abstract class AbstractDataManager {
 	public abstract String[] getCursorColumnNames();
 	
 	public abstract void fireDatabaseUpdate();
+	
+	public void refreshData() {};
 }

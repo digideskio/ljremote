@@ -16,6 +16,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -23,7 +24,11 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.Scroller;
 
 import com.ljremote.android.data.DataManager;
 import com.ljremote.android.fragments.AbstractDetailFragment;
@@ -94,6 +99,7 @@ public class MainActivity extends FragmentActivity implements
 		}
 	};
 	private MenuItem itemChangeMode;
+	private MenuDrawerHelper menuDrawerHelper;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +110,8 @@ public class MainActivity extends FragmentActivity implements
 		initConf();
 
 		dm = new DataManager(this);
+
+		menuDrawerHelper = new MenuDrawerHelper();
 
 		detailsFragments = new ArrayList<AbstractDetailFragment>();
 		registerFragment(new TabbedLJFunctionFragment());
@@ -121,9 +129,8 @@ public class MainActivity extends FragmentActivity implements
 				: savedInstanceState.getInt(STATE_LAST_LOAD_FRAGMENT_POS, -1);
 
 		connectivityDialog = new ConnectivityDialogFragment();
-		// Set up the action bar to show a dropdown list.
-		final ActionBar actionBar = getActionBar();
-		actionBar.setDisplayHomeAsUpEnabled(true);
+		 final ActionBar actionBar = getActionBar();
+		 actionBar.setDisplayHomeAsUpEnabled(true);
 
 		// Service
 		Intent intent = new Intent(this, LJClientService.class);
@@ -150,12 +157,6 @@ public class MainActivity extends FragmentActivity implements
 		Intent intent = null;
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			// if (!deviceIsLargeScreen() && lastLoadFragmentPosition > 0) {
-			// app icon in action bar clicked; go home
-			// intent = new Intent(this, MainActivity.class);
-			// startActivity(intent);
-			// }
-			// return true;
 			if (!deviceIsLargeScreen()) {
 				if (serviceBound && ljService != null) {
 					Bundle args = new Bundle();
@@ -166,10 +167,12 @@ public class MainActivity extends FragmentActivity implements
 				getSupportFragmentManager().beginTransaction()
 						.replace(R.id.detail_container, menuFragment).commit();
 			}
+			menuDrawerHelper.toggle();
 			break;
-		// case R.id.menu_testjson:
-		// startActivity(new Intent(this, JSonTestActivity.class));
-		// break;
+		case R.id.menu_affiche:
+//			menuDrawerHelper.animateToggle();
+			menuDrawerHelper.toggle();
+			break;
 		case R.id.menu_change_mode:
 			updateConf();
 			connectivityDialog.setArguments(conf);
@@ -197,7 +200,8 @@ public class MainActivity extends FragmentActivity implements
 		conf.putString(ConnectivityDialogFragment.SOCKET_ADDRESS, host_adress
 				+ ":" + host_port);
 		conf.putSerializable(ConnectivityDialogFragment.SERVICE_MODE,
-				serviceBound && ljService != null  ? ljService.getCurrentMode() : MODE.NONE);
+				serviceBound && ljService != null ? ljService.getCurrentMode()
+						: MODE.NONE);
 	}
 
 	public boolean deviceIsLargeScreen() {
@@ -452,6 +456,114 @@ public class MainActivity extends FragmentActivity implements
 				Intent intent = new Intent(this, LJClientService.class);
 				bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 			}
+		}
+	}
+
+	class MenuDrawerHelper {
+		private int mHostOffsetX;
+		private boolean opened;
+
+		private ViewGroup root;
+		private View menu;
+		private View host;
+
+		public MenuDrawerHelper() {
+			menu = findViewById(R.id.menu_container);
+			root = (ViewGroup) menu.getParent();
+			host = findViewById(R.id.detail_container);
+			close();
+		}
+
+		// @Override
+		// protected void onLayout(boolean changed, int l, int t, int r, int b)
+		// {
+		// if(changed){
+		// mHostOffsetX= this.getWidth() - 44;
+		// menu.layout(0, 0, mHostOffsetX, this.getHeight());
+		// host.layout(mHostOffsetX, 0, this.getWidth()+mHostOffsetX,
+		// this.getHeight());
+		// invalidate();
+		// }
+		// }
+
+		class CloseScroll implements Runnable {
+
+			int currentPos;
+			Scroller scroll;
+			
+			public CloseScroll(Scroller scroller, int currentPos) {
+				scroll = scroller;
+				this.currentPos = currentPos;
+			}
+			
+			@Override
+			public void run() {
+				if ( scroll.computeScrollOffset() ) {
+					host.offsetLeftAndRight(scroll.getCurrX() - currentPos);
+					root.invalidate();
+					new Handler().postDelayed(new CloseScroll(scroll, scroll.getCurrX()), 16);
+				} else {
+					opened = false;
+				}
+			}
+
+		}
+
+		public void animateClose() {
+			final Scroller scrol = new Scroller(MainActivity.this);
+			Handler handler = new Handler();
+			scrol.startScroll(-host.getWidth(), 0, 0, 0, 1000);
+			new Handler().postDelayed(new CloseScroll(scrol, scrol.getStartX()), 16);
+		}
+
+		public void animateOpen() {
+			menu.setVisibility(View.VISIBLE);
+
+			opened = true;
+		}
+
+		public void animateToggle() {
+			if (isOpened()) {
+				animateClose();
+			} else {
+				animateOpen();
+			}
+		}
+
+		public void close() {
+			menu.setVisibility(View.GONE);
+			// root.invalidate();
+			// menu.offsetLeftAndRight(-menu.getWidth());
+			opened = false;
+		}
+
+		public void open() {
+			menu.setVisibility(View.VISIBLE);
+			// menu.offsetLeftAndRight(menu.getWidth());
+
+			// root.invalidate();
+			opened = true;
+		}
+
+		public void toggle() {
+			Log.d(TAG, "toggle");
+			if (isOpened()) {
+				close();
+			} else {
+				open();
+			}
+		}
+
+		public boolean isOpened() {
+			return opened;
+		}
+
+		public boolean isMoving() {
+			return false;
+		}
+
+		public boolean isAnimating() {
+			return false;
 		}
 	}
 

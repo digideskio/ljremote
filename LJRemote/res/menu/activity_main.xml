@@ -31,7 +31,8 @@
             </group>
             <item android:id="@+id/item1" android:visible="true" android:menuCategory="container" android:showAsAction="always" android:actionViewClass="android.widget.SearchView"/>
         </menu> -->
-    </item>
+    </item><item android:id="@+id/menu_affiche" android:title="SWITCH" android:showAsAction="always" android:orderInCategory="1"></item>
+    
     
 
 </menu>

@@ -1,16 +1,12 @@
 package com.ljremote.android.fragments;
 
-import android.app.ActionBar.TabListener;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -22,17 +18,15 @@ import com.ljremote.android.data.CueManager;
 import com.ljremote.android.data.CueManager.CueSyncTask;
 import com.ljremote.android.data.DataManager.OnDatabaseUpdateListener;
 import com.ljremote.android.data.DataManager.TABLES;
-import com.ljremote.android.ui.MyTabListener;
 import com.ljremote.json.model.Cue;
 
-public class CueFragment extends AbstractDetailFragment implements OnClickListener, OnDatabaseUpdateListener {
+public class CueFragment extends AbstractDetailFragment implements OnDatabaseUpdateListener {
 
 	private static final String CUE_LIST = "Cue list";
 	private static final String CURRENT_CUE = "Current Cue";
 	private ListView listView;
 	private MODE currentMode;
 	private TextView title;
-	private MyTabListener<CueFragment> tabListener;
 
 	public CueFragment() {
 		super(R.string.cues);
@@ -55,18 +49,21 @@ public class CueFragment extends AbstractDetailFragment implements OnClickListen
 	}
 	
 	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		setHasOptionsMenu(true);
+	}
+	
+	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		Log.d("CueFragment", "onCreateView tag=" +getTag() + ", " + getArguments());
-//		if( getArguments() != null ){
-//			currentMode = (MODE) getArguments().getSerializable("mode");
-//		} else if ( savedInstanceState != null) {
-//			currentMode = (MODE) savedInstanceState.getSerializable("mode");
-//		}
 		currentMode = MODE.tagToMode(getTag());
 		
 		MainActivity main = (MainActivity) getActivity();
 		setDataManager(main.getDataManager().getCueManager());
+
+		getDataManager().getMainDataManager().registerDatabaseUpdateListener(this);
 		
 		View mainView;
 		switch (currentMode) {
@@ -74,7 +71,6 @@ public class CueFragment extends AbstractDetailFragment implements OnClickListen
 			mainView = inflater.inflate(R.layout.current_cue_fragment, null, true);
 			title = ((TextView) mainView.findViewById(R.id.current_cue_title));
 			updateCurrentCueTittle();
-			getDataManager().getMainDataManager().registerDatabaseUpdateListener(this);
 			break;
 		case LIST:
 		default:
@@ -103,8 +99,6 @@ public class CueFragment extends AbstractDetailFragment implements OnClickListen
 //				}
 //			});
 			
-			((Button) mainView.findViewById(R.id.up_all)).setOnClickListener(this);
-			((Button) mainView.findViewById(R.id.clear_all)).setOnClickListener(this);
 			break;
 		}
 		return mainView;
@@ -146,41 +140,18 @@ public class CueFragment extends AbstractDetailFragment implements OnClickListen
 		getDataManager().getMainDataManager().getService().submit(task);
 	}
 
-
-	@Override
-	public void onClick(View v) {
-		Log.d("cue.update_all", "onClick : " + v.getId() + " ( " + R.id.up_all + " ) ");
-		switch (v.getId()) {
-		case R.id.up_all:
-			((CueManager) getDataManager()).updateAllDB();
-			break;
-		case R.id.clear_all:
-			((CueManager) getDataManager()).clearAll();
-		default:
-			break;
-		}
-	}
-
-
 	@Override
 	public void onTableUpdateListener(Context context, TABLES table) {
 		if( table == TABLES.CUES ){
-			updateCurrentCueTittle();
+			switch (currentMode) {
+			case CURRENT:
+				updateCurrentCueTittle();
+				break;
+			case LIST:
+			default:
+			}
+			setRefreshActionButtonState(false);
 		}
 	}
 
-//	@Override
-//	public boolean hasTab() {
-//		return true;
-//	}
-//
-//	@Override
-//	public String[] getTabNames() {
-//		return new String[]{CURRENT_CUE,CUE_LIST};
-//	}
-//
-//	@Override
-//	public TabListener getTabListener(FragmentActivity activity,String tag) {
-//		return tabListener == null || tag != getTag() ? tabListener = new MyTabListener<CueFragment>(this,activity, tag, CueFragment.class) : tabListener;
-//	}
 }
